@@ -24,7 +24,7 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 ---
 
 ### Step 2: Architecture Discovery & Skill Assessment
-1. **Brownfield Discovery:** Trace symbols/flows via `grep_search` and range-limited `view_file` (`DB -> Domain -> API -> UI`). Assess schema impact, breaking risks, and existing test suites/coverage.
+1. **Brownfield Discovery:** Trace symbols/flows via `grep_search` and range-limited `view_file` (`DB -> Domain -> API -> UI`). Assess schema impact, breaking risks, and existing test suites/coverage. **Cite only verified paths and signatures in specs — never speculate about file contents or API shapes without inspection (Rule I).**
 2. **Greenfield / HLA Discovery:** Synthesize runtimes, DBs, message queues, auth providers (Entra ID, Auth0, Cognito), 3rd-party APIs (Stripe, Twilio, SendGrid), and cloud topology (Azure, AWS, GCP).
 3. **Skill Gap Discovery & Security Guard:**
    - Check active workspace (`.agents/skills/`) and global (`~/.gemini/config/skills/`) skills.

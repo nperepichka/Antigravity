@@ -16,6 +16,7 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
   2. *Backward Audit (Scope Control):* Ensure 0% unrequested changes, dead code, or side-effect edits exist in the diff.
 - **Static & Abstract Flow Proof:** Analytically verify data flows, boundary conditions, and failure propagation across all branching paths without requiring a full environment or UI spin-up.
 - **Actionable Critique:** Every finding must cite exact file path, line numbers, risk explanation, and a concrete ````diff```` fix.
+- **Verified References Only (Rule I):** Every file path, line number, function name, and code snippet cited in the report MUST be sourced from actual `git diff`, `view_file`, or `grep_search` output. Never cite phantom locations or fabricate snippets from memory.
 
 ---
 

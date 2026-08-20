@@ -33,6 +33,8 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
 ### Step 2: Phase I — Tactical Development Loop
 Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verification)**. Strict **Scope Guard:** Never touch files listed under `Out of Scope`.
 
+> **Ground-Truth Gate (Rule I):** Before writing code that depends on existing signatures, types, or patterns, verify the actual current state of target files — never code against assumptions from memory or stale context. If actual state diverges from the spec or plan, adapt the implementation approach to match reality and note the deviation in the walkthrough.
+
 > **Iterative Loop Rule:** Iterate through steps 2.0 – 2.4 (*Detect/Fail -> Surgical Patch -> Re-verify*) until **all checks are 100% green** before moving to Phase II.
 
 - **2.0 Dependency Installation Gate:** If new packages are needed, request user confirmation (**Rule C**) specifying name, version, and reason.
@@ -69,9 +71,10 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 ### Step 4: Delivery & Artifacts
 1. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
 2. **Phase / Sub-Phase Tracking & Handoff:**
-   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, provide clickable link and ready `/implement` command.
+   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality before providing the handoff link and ready `/implement` command.
    - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
 3. **User Summary:** Concise summary in user's conversational language (**Rule A**).
+4. **Context Hygiene Gate:** If 5+ phases/sub-phases have been completed and verified in the current session, proactively suggest `/checkpoint` to preserve progress before context degradation impacts quality.
 
 ---
 

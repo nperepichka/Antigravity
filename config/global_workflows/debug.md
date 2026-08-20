@@ -42,7 +42,7 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
    - *Zero & Boundary States:* `null`/`undefined`/`None`, `0`, empty collections, max bounds, empty strings.
    - *Failure & Async Propagation:* Swallowed exceptions, unhandled Promise rejections, hanging threads, missing timeouts.
    - *State & Resource Consistency:* Unclosed stream/socket handles, uncommitted/unrolled transactions, race conditions on shared state.
-2. **Hypothesis Validation:** Formulate 1–2 precise hypotheses for *why* the defect occurs. Verify against the failing repro test and code ranges.
+2. **Hypothesis Validation:** Formulate 1–2 precise hypotheses for *why* the defect occurs. Verify against the failing repro test and code ranges. **Ground each hypothesis in observed code/output — never hypothesize based on assumed behavior of unverified functions, configs, or library internals (Rule I).**
 
 ---
 

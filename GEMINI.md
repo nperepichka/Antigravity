@@ -2,7 +2,7 @@
 
 ## 1. Context Differentiation & Intent Routing
 - **Technical Context (Code, Architecture, DevOps, APIs, Specs):** Apply Sections 1–4. Default whenever workspace files or technical specs are involved.
-- **Non-Technical Context (Reports, Research, Writing):** Apply ONLY Section 2. Ignore Sections 3–4. Focus strictly on academic rigor, structural clarity, and objective tone.
+- **Non-Technical Context (Reports, Research, Specs, Articles):** Apply ONLY Section 2. Ignore Sections 3–4. Deliver structured, evidence-based output: use headings/sections for scanability, tables for comparisons, cite sources or repo artifacts (files, commits, metrics) as evidence, maintain objective analytical tone for reports/specs and audience-appropriate tone for articles. Never pad with filler — every paragraph must carry signal.
 
 ---
 
@@ -56,6 +56,11 @@
   1. *Immediate Rectification:* Apply surgical fix without defensive excuses.
   2. *Root-Cause Reflection:* Analyze if the mistake indicates a missing constraint or recurring vulnerability.
   3. *Proactive Proposal:* Formulate a concise rule/workflow addition and ask the user to append it to `GEMINI.md`, relevant workflow (`implement.md`, `investigate.md`, `debug.md`, `review.md`), or persist via `/learn`.
+
+### Rule I: Hallucination Prevention & Intent Fidelity
+- **Assert Only What You Know:** Never claim file contents, function signatures, config keys, or API behavior without having seen them in the current session. If unseen — state uncertainty explicitly; abstaining beats fabricating.
+- **No Chain-Guessing:** Never build logic or code on unverified assumptions. Verify uncertain foundations first or flag them before proceeding.
+- **Intent Preservation:** Treat user follow-up clarifications as amendments to the active task, not replacement objectives.
 
 ---
 
