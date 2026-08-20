@@ -34,6 +34,13 @@ flowchart TD
     UserFeedback["💡 User Correction / Anti-Pattern Flag"] --> RuleG["🔄 Rule G: Self-Improvement Protocol\n(Proactive Proposal -> GEMINI.md / Workflows / /learn)"]
     RuleG -.-> Investigate
     RuleG -.-> Implement
+
+    ContextBloat["🧠 Довга сесія / Переповнений контекст"] --> CheckpointSave["🧹 /checkpoint (Дистиляція стану)"]
+    CheckpointSave --> CheckpointFile["📑 .local/checkpoint.md"]
+    CheckpointFile --> NewSession["✨ + New Chat (Чиста пам'ять)"]
+    NewSession --> CheckpointLoad["🔄 /checkpoint load (Відновлення контексту)"]
+    CheckpointLoad -.-> Investigate
+    CheckpointLoad -.-> Implement
 ```
 
 ---
@@ -45,12 +52,13 @@ flowchart TD
 ```
 ├── GEMINI.md                   # Глобальні правила, межі безпеки та протокол комунікації
 └── config/
-    ├── global_workflows/       # 5 основних воркфловів (Slash Commands)
+    ├── global_workflows/       # 6 основних воркфловів (Slash Commands)
     │   ├── investigate.md      # /investigate — аналіз, архітектура та декомпозиція
     │   ├── implement.md        # /implement — тактична розробка та стратегічний аудит
     │   ├── debug.md            # /debug — детермінований RCA та виправлення багів
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
-    │   └── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
+    │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
+    │   └── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
     └── skills/                 # 33 спеціалізовані інженерні скіли (Domain Capabilities)
 ```
 
@@ -103,6 +111,11 @@ flowchart TD
 **Файл:** `config/global_workflows/describe.md`
 - Автоматично створює короткий, структурований опис PR у файл `.local/pr_description.md`.
 - Conventional Commit Title, мотивація змін, покомпонентний список правок (Domain, API, DB, Config) та Breaking Changes.
+
+### 6. `/checkpoint` (Збереження та відновлення контексту)
+**Файл:** `config/global_workflows/checkpoint.md`
+- Інтерактивно дистилює важливі знання сесії (багатозадачні напрямки, архітектурні рішення, стан коду, беклог) у `.local/checkpoint.md`.
+- Дозволяє за допомогою команди `/checkpoint load` миттєво відновити повний робочий контекст у новій сесії з чистою пам'яттю (0% галюцинацій).
 
 ---
 
