@@ -34,12 +34,12 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
      - `https://github.com/VoltAgent/awesome-agent-skills` (Vendor-vetted specialized capabilities)
      - `https://github.com/ZhangYu-zjut/awesome-Antigravity` (Workflows & best practices)
    - Dynamic search if specialized: `search_web` for `"<domain> skill antigravity" site:github.com` or `"SKILL.md" "<tech>"`.
-   - **Skill Security Guard:** Audit `SKILL.md` before recommending (no unauthorized network calls or unsafe scripts). Recommend 1–3 vetted skills in `00_overview.md`.
+   - **Skill Security Guard:** Audit `SKILL.md` before recommending (no unauthorized network calls or unsafe scripts). Recommend 1–3 vetted skills in `00_overview.md` (provide URL).
 
 ---
 
 ### Step 3: Phase Classification & DAG Decomposition
-Decompose into minimally coupled, logically cohesive phases with rigorous DoDs:
+Decompose the task into cohesive phases. Act situationally: for massive tasks, group related features into larger logical phases. For smaller tasks or when breaking down a specific phase, aim for **hyper-granular, atomic sub-phases** (e.g., one sub-phase = one logical PR, such as DB models only, or a single API endpoint).
 
 1. **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
 2. **`[MANUAL/DEVOPS]` (Cloud/Infra):** Cloud provisioning, portal config, OAuth/IdP app registration, DNS/SSL, secret vaults (Key Vault, Secrets Manager), webhooks.
@@ -47,8 +47,9 @@ Decompose into minimally coupled, logically cohesive phases with rigorous DoDs:
 4. **`[QA]` (E2E Verification & `/review`):**
    - Integration/E2E test suites, performance benchmarks, and security checks.
    - **Mandatory `/review` Integration:** Audit feature diff with `/review`. Triage `🔴 Must Fix` / `🟡 Should Fix` with surgical patches until `🟢 APPROVED`.
-   - **Milestone QA Scheduling:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases (e.g., Core Models -> `[QA]`, APIs -> `[QA]`, Full UI -> `[QA]`).
-5. **DAG Validation & Shared Contracts:** Validate acyclic order (DAG). Extract shared cross-cutting concerns (auth, logging, config) into prerequisite phases or document in `00_overview.md`.
+   - **Milestone & Final QA:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases. **CRITICAL:** The entire master plan MUST always conclude with a final `[QA]` phase. Never skip the final review.
+5. **Recursive Decomposition (Sub-phases):** If the user asks to investigate a specific large phase (e.g., `/investigate phase 2`), decompose it into atomic, highly granular sub-phases (e.g., `02a_<name>.md`, `02b_<name>.md`). Each sub-phase must be small enough to be implemented flawlessly by `/implement`.
+6. **DAG Validation & Shared Contracts:** Validate acyclic order (DAG). Extract shared cross-cutting concerns (auth, logging, config) into prerequisite phases or document in `00_overview.md`.
 
 ---
 

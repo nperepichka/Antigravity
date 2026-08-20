@@ -20,10 +20,12 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
    - **Go:** `go.mod` -> `go build ./...`, `go test ./...`, `golangci-lint run`
    - **Greenfield:** Scaffold standard layout, dependency definitions, and initial configs.
    - **Monorepo:** (`nx`, `turbo`, `lerna`, `pnpm-workspace`) Scope build/test/lint commands to affected package.
-2. **Task Ingestion & Planning Mode:**
-   - **Input Formats:** Prompts, issues, task files (`task.md`, `prompt.md`, `specs/*.md`), PDFs, or `/investigate` phase files (`01_<name>.md`).
+   - **Conditional Baseline Sanity Check:** At the very start of a session or when working in an unfamiliar/unverified environment (only when necessary, do not repeat across consecutive phase runs), run a quick baseline build/test to ensure the repo is green prior to edits. If broken, warn user upfront.
+2. **Task Ingestion & Skill Alignment:**
+   - **Input Formats:** Prompts, issues, standalone task files (`task.md`, `prompt.md`, `specs/*.md`), PDFs, or `/investigate` phase/sub-phase files (`01_<name>.md`, `01a_<name>.md`).
+   - **Skill Ingestion:** Check `00_overview.md`, task specifications, or stack requirements for recommended agent skills and activate them if available.
    - **Fast-Track (`/investigate` specs):** If prerequisites are met, **adopt Scope, Target Files, Context Snippets, and DoD directly as the approved plan** and skip to Step 2.
-   - **Standard Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) and obtain user approval.
+   - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) and obtain explicit user approval.
    - **Minor / Straightforward:** Proceed directly to Step 2.
 
 ---
@@ -44,18 +46,21 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 - **2.4 Schema, State & Full Regression Gate:**
   - Verify ORM migrations (EF Core, Flyway, Liquibase, Drizzle, Prisma, Alembic) and client bindings.
   - Run full test suite and global build to ensure zero regressions in unaffected modules.
+- **2.5 Scope Creep & Complexity Circuit Breaker:**
+  - If during implementation a phase is discovered to contain hidden architectural obstacles, unmanageable blast radius, or requires splitting into sub-tasks, halt and suggest running `/investigate <phase>` to break it down into atomic sub-phases (`01a`, `01b`).
 
 ---
 
 ### Step 3: Phase II — Strategic Architectural Review
 *Executes ONLY when Phase I is 100% green.*
 
-1. **Holistic Self-Audit:**
-   - *Completeness:* All explicit/implicit requirements and edge cases handled?
-   - *SOLID & Cleanliness:* Production-ready without hacky workarounds?
-   - *Surgical Scope:* Minimal diff respected; stayed within in-scope boundaries?
-   - *Security & Performance:* No memory leaks, concurrency hazards, unclosed handles, or bottlenecks?
-2. **Revert vs. Patch:**
+1. **Bidirectional Diff Reconciliation (Forward & Backward Audit):**
+   - *Forward Audit (Completeness):* 100% of the DoD, acceptance criteria, and edge cases are implemented.
+   - *Backward Audit (Scope Control):* 0% unrequested edits, unsolicited refactorings, or side-effects in `git diff` (**Rule D**).
+2. **Holistic Self-Audit:**
+   - *SOLID & Cleanliness:* Production-ready, maintainable, no hacky workarounds.
+   - *Security & Performance:* No leaks, concurrency hazards, unclosed handles, or bottlenecks.
+3. **Revert vs. Patch:**
    - *Minor issues:* Apply targeted patches and re-verify in Step 2.
    - *Fundamental architectural flaws:* Revert affected components and re-implement cleanly. Never stack hacks on a broken foundation.
 
@@ -63,7 +68,9 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 
 ### Step 4: Delivery & Artifacts
 1. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
-2. **Phase Tracking & Handoff (Investigate Tasks):** Mark phase acceptance criteria `[x]`, update `00_overview.md` status from `[>] In Progress` to `[x] Completed`. If next phase (`[ ] Pending`) exists, provide clickable link and ready `/implement` command.
+2. **Phase / Sub-Phase Tracking & Handoff:**
+   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, provide clickable link and ready `/implement` command.
+   - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
 3. **User Summary:** Concise summary in user's conversational language (**Rule A**).
 
 ---
