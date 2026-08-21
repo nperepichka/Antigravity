@@ -8,6 +8,12 @@
 
 ```mermaid
 flowchart TD
+    RepoInit["📦 New Repo / Onboarding / Tech Drift"] --> Context["📑 /context (Мультиджерельний аналіз)"]
+    Context --> ContextFile["📑 .agents/rules/repository-context.md"]
+    ContextFile -.-> Investigate
+    ContextFile -.-> Implement
+    ContextFile -.-> Debug
+
     Task["📋 Feature / HLD / User Prompt / PDF"] --> Investigate["🔍 /investigate (Read-Only)"]
     Investigate --> SolutionSynthesis["💡 Mandatory Trade-off Synthesis & Anti-Overengineering\n(Options A/B/C, Completeness, KISS/YAGNI, Hybrid Choice)"]
     SolutionSynthesis --> SkillDiscovery["🧰 Skill Gap Assessment\n(Curated Repos & Local Skills)"]
@@ -53,7 +59,8 @@ flowchart TD
 ```
 ├── GEMINI.md                   # Глобальні правила, межі безпеки та протокол комунікації
 └── config/
-    ├── global_workflows/       # 6 основних воркфловів (Slash Commands)
+    ├── global_workflows/       # 7 основних воркфловів (Slash Commands)
+    │   ├── context.md          # /context — ініціалізація та оновлення контексту репозиторія
     │   ├── investigate.md      # /investigate — аналіз, архітектура та декомпозиція
     │   ├── implement.md        # /implement — тактична розробка та стратегічний аудит
     │   ├── debug.md            # /debug — детермінований RCA та виправлення багів
@@ -86,35 +93,41 @@ flowchart TD
 
 ## 🚀 Воркфлови (Slash Commands)
 
-### 1. `/investigate` (Дослідження, синтез рішень та декомпозиція)
+### 1. `/context` (Ініціалізація та оновлення контексту репозиторія)
+**Файл:** `config/global_workflows/context.md`
+- Мультиджерельний збір знань (користувацький запит + `README.md`/документація + маніфести коду та конфіги) в єдиний стандартизований файл `.agents/rules/repository-context.md`.
+- **Non-Destructive Merge:** безпечно оновлює технічні факти (стек, команди, структура), зберігаючи всі кастомні правила та домовленості користувача.
+- Забезпечує миттєвий старт будь-якої сесії без галюцинацій та зайвих розпитувань про архітектуру проєкту.
+
+### 2. `/investigate` (Дослідження, синтез рішень та декомпозиція)
 **Файл:** `config/global_workflows/investigate.md`
 - Глибокий аналіз задач, архітектури (HLD/ADR/PDF) без модифікації робочого коду (**Read-Only**).
 - **Mandatory Trade-off Synthesis:** обов'язковий порівняльний аналіз 2–3 підходів (Minimalist vs Enterprise vs Alternative) з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), Blast Radius та вибором або гібридним синтезом.
 - Автоматичний підбір потрібних скілів під стек проєкту та планування проміжних QA-гейтів.
 - Генерує майстер-план `.local/tasks/**/00_overview.md` (із секцією `Architecture Decisions & Trade-off Synthesis`) та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]`.
 
-### 2. `/implement` (Автономна розробка та перевірка)
+### 3. `/implement` (Автономна розробка та перевірка)
 **Файл:** `config/global_workflows/implement.md`
 - Працює у двох режимах: автономному (прямі задачі) та *Fast-Track* (підхоплює фази/підфази від `/investigate`).
 - Двофазний цикл: **Phase I** (компіляція, точкові тести, візуальна верифікація) + **Phase II** (стратегічний аудит, Bidirectional Diff Reconciliation та чистота за SOLID).
 
-### 3. `/debug` (RCA та усунення багів)
+### 4. `/debug` (RCA та усунення багів)
 **Файл:** `config/global_workflows/debug.md`
 - **Red-Before-Green Gate:** створення детермінованого падаючого тесту перед будь-якою зміною коду.
 - Аналітичний аудит інваріантів (Zero/Boundary, витоки помилок/промісів) та точкове виправлення кореневої причини.
 
-### 4. `/review` (Аудит коду та статична верифікація)
+### 5. `/review` (Аудит коду та статична верифікація)
 **Файл:** `config/global_workflows/review.md`
 - Строге **read-only** рев'ю за протоколом *Static Flow Verification & Bidirectional Reconciliation*.
 - Двостороння перевірка diff (100% покриття вимог і 0% незапитаного коду), OWASP-безпека, Blast Radius аудит.
 - Працює для незакоміченого коду (`git diff HEAD`), гілок/PR (`git diff main...feature`) та історії комітів.
 
-### 5. `/describe` (Генерація опису Pull Request)
+### 6. `/describe` (Генерація опису Pull Request)
 **Файл:** `config/global_workflows/describe.md`
 - Автоматично створює короткий, структурований опис PR у файл `.local/pr_description.md`.
 - Conventional Commit Title, мотивація змін, покомпонентний список правок (Domain, API, DB, Config) та Breaking Changes.
 
-### 6. `/checkpoint` (Збереження та відновлення контексту)
+### 7. `/checkpoint` (Збереження та відновлення контексту)
 **Файл:** `config/global_workflows/checkpoint.md`
 - Інтерактивно дистилює важливі знання сесії (багатозадачні напрямки, архітектурні рішення, стан коду, беклог) у `.local/checkpoint.md`.
 - Дозволяє за допомогою команди `/checkpoint load` миттєво відновити повний робочий контекст у новій сесії з чистою пам'яттю (0% галюцинацій).
