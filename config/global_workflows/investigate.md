@@ -38,7 +38,29 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 
 ---
 
-### Step 3: Phase Classification & DAG Decomposition
+### Step 3: Mandatory Solution Exploration & Trade-off Synthesis
+Before decomposing into phases, evaluate **2–3 distinct architectural approaches / design options** for the task to prevent premature commitments, minimize blast radius, and avoid overengineering:
+
+1. **Divergent Ideation (2–3 Architectural Options):**
+   - **Option A (Lightweight / Native / Minimalist):** Minimal/zero new dependencies, native language/platform features, lowest cognitive overhead and minimal diff.
+   - **Option B (Pattern-Rich / Extensible / Enterprise):** Established design patterns (Strategy, Pipeline, State Machine, CQRS), battle-tested libraries, high decoupling for future scale.
+   - **Option C (Alternative Paradigm):** Alternative execution/storage models (e.g., event-driven vs request-response, streaming vs batch, DB-level constraints vs application-level logic).
+
+2. **Comparative Evaluation Matrix (Mandatory Criteria):**
+   - **Requirement Completeness:** Does this option fulfill 100% of functional & non-functional requirements without hacky workarounds?
+   - **Anti-Overengineering & Parsimony (KISS / YAGNI):** Is the solution appropriately sized, or does it introduce unnecessary abstractions, premature generalizations, or bloated dependencies?
+   - **Blast Radius & Regression Risk:** How many modules, schemas, or existing tests are impacted?
+   - **Cognitive Load & DX:** Is the resulting code easy to comprehend, navigate, and debug for other engineers 6+ months from now?
+   - **Performance & Resource Footprint:** Latency, CPU/memory allocations, throughput, and connection/lock overhead.
+   - **Testability:** Ease of writing isolated, deterministic unit and integration tests.
+
+3. **Decision & Hybrid Synthesis Gate:**
+   - Select either a clear winning option OR synthesize a **Hybrid Approach** combining the strengths of multiple options (e.g., lightweight native interfaces from Option A + robust error handling / resilience policies from Option B).
+   - Formulate clear architectural justification and document it in the master plan.
+
+---
+
+### Step 4: Phase Classification & DAG Decomposition
 Decompose the task into cohesive phases. Act situationally: for massive tasks, group related features into larger logical phases. For smaller tasks or when breaking down a specific phase, aim for **hyper-granular, atomic sub-phases** (e.g., one sub-phase = one logical PR, such as DB models only, or a single API endpoint).
 
 1. **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
@@ -53,16 +75,17 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 
 ---
 
-### Step 4: Specification File Generation
+### Step 5: Specification File Generation
 
-#### 4.1 Master Plan (`00_overview.md`)
+#### 5.1 Master Plan (`00_overview.md`)
 - **System Architecture & Context:** Solution summary + Mermaid diagrams.
+- **Architecture Decisions & Trade-off Synthesis:** Mandatory comparative table of considered approaches (Options A/B/C), scores against criteria (Completeness, Anti-Overengineering, Blast Radius, DX, Performance, Testability), and detailed rationale for the chosen or hybrid path.
 - **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
 - **Execution Matrix (DAG):** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`).
 - **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
 - **Shared Data Contracts:** DTO schemas, interfaces, event payloads.
 
-#### 4.2 Phase Files (`01_<name>.md`, `02_<name>.md`, ...)
+#### 5.2 Phase Files (`01_<name>.md`, `02_<name>.md`, ...)
 Use the corresponding structured template (all in **English**):
 
 - **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
@@ -72,7 +95,7 @@ Use the corresponding structured template (all in **English**):
 
 ---
 
-### Step 5: Review & Delivery
+### Step 6: Review & Delivery
 1. All generated specifications MUST be in **English** (**Rule E**).
 2. Summarize findings, skill recommendations, and phase structure in user's language (**Rule A**).
 3. Provide clickable markdown links to `00_overview.md` and phase files.

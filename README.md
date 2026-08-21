@@ -9,7 +9,8 @@
 ```mermaid
 flowchart TD
     Task["📋 Feature / HLD / User Prompt / PDF"] --> Investigate["🔍 /investigate (Read-Only)"]
-    Investigate --> SkillDiscovery["🧰 Skill Gap Assessment\n(Curated Repos & Local Skills)"]
+    Investigate --> SolutionSynthesis["💡 Mandatory Trade-off Synthesis & Anti-Overengineering\n(Options A/B/C, Completeness, KISS/YAGNI, Hybrid Choice)"]
+    SolutionSynthesis --> SkillDiscovery["🧰 Skill Gap Assessment\n(Curated Repos & Local Skills)"]
     SkillDiscovery --> Specs["📑 Specs: 00_overview.md + 01_phase.md..."]
     Specs --> Implement["⚡ /implement (Fast-Track Phases)"]
     
@@ -85,11 +86,12 @@ flowchart TD
 
 ## 🚀 Воркфлови (Slash Commands)
 
-### 1. `/investigate` (Дослідження та декомпозиція)
+### 1. `/investigate` (Дослідження, синтез рішень та декомпозиція)
 **Файл:** `config/global_workflows/investigate.md`
 - Глибокий аналіз задач, архітектури (HLD/ADR/PDF) без модифікації робочого коду (**Read-Only**).
+- **Mandatory Trade-off Synthesis:** обов'язковий порівняльний аналіз 2–3 підходів (Minimalist vs Enterprise vs Alternative) з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), Blast Radius та вибором або гібридним синтезом.
 - Автоматичний підбір потрібних скілів під стек проєкту та планування проміжних QA-гейтів.
-- Генерує майстер-план `.local/tasks/**/00_overview.md` та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]`.
+- Генерує майстер-план `.local/tasks/**/00_overview.md` (із секцією `Architecture Decisions & Trade-off Synthesis`) та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]`.
 
 ### 2. `/implement` (Автономна розробка та перевірка)
 **Файл:** `config/global_workflows/implement.md`
