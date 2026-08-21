@@ -46,8 +46,11 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
   - Render output to PNG using Windows CLI (`pdftoppm`, LibreOffice headless CLI, Playwright) or Python fallback (`pymupdf`/`fitz`, `pdf2image`).
   - Visually inspect via multimodal vision (margins, alignment, typography, line wraps). Fix visual flaws iteratively.
 - **2.4 Schema, State & Full Regression Gate:**
-  - Verify ORM migrations (EF Core, Flyway, Liquibase, Drizzle, Prisma, Alembic) and client bindings.
-  - Run full test suite and global build to ensure zero regressions in unaffected modules.
+   - Verify ORM migrations (EF Core, Flyway, Liquibase, Drizzle, Prisma, Alembic) and client bindings.
+   - **Cross-Layer Contract Integrity:** When modifying Domain Entities or DTOs, verify cascading impact across mapping layers, API controller return types, OpenAPI schemas, and frontend client interfaces.
+   - **Data Access Hotpath Audit:** Verify zero N+1 queries (no DB/API calls inside loops — use batch operations, projection queries, or eager includes). For new filtered queries or FK joins, ensure corresponding composite index migrations exist.
+   - **Pagination Guard:** For datasets potentially exceeding 10K rows, enforce keyset/cursor-based pagination over OFFSET/SKIP.
+   - Run full test suite and global build to ensure zero regressions in unaffected modules.
 - **2.5 Scope Creep & Complexity Circuit Breaker:**
   - If during implementation a phase is discovered to contain hidden architectural obstacles, unmanageable blast radius, or requires splitting into sub-tasks, halt and suggest running `/investigate <phase>` to break it down into atomic sub-phases (`01a`, `01b`).
 

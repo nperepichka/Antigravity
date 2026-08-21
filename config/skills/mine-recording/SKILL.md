@@ -87,6 +87,24 @@ On form-heavy pages, a burst of frames is almost always the expert *scrolling*. 
 
 ---
 
+## Cloud-Assisted Analysis (Optional Tier 3)
+
+When the local pipeline has produced frames + transcript but deeper semantic understanding is needed (complex domain terminology, code on screen, architectural diagrams):
+
+1. **Key frames → agent vision:** Feed extracted PNGs via `view_file` for OCR/code extraction.
+2. **Short clips (< 10 min):** Pass the video file directly to the agent's multimodal capabilities for temporal grounding and audio-visual correlation.
+3. **Targeted segments:** Use local Tier 1 index to identify minutes of interest, then re-analyze those segments with multimodal for precise extraction.
+
+| Scenario | Path |
+|---|---|
+| Long recordings (30+ min), privacy-sensitive | Local pipeline (Tier 1-2) |
+| Short bug demo, architecture walkthrough | Direct multimodal |
+| Dense domain terms needing verification | Local Tier 1 → Cloud Tier 3 for segments |
+
+**Hard constraint:** Never upload client-sensitive recordings without explicit user authorization.
+
+---
+
 ## Tagging Discipline: Layer & Provenance
 
 When creating the findings document, tag every finding:

@@ -60,6 +60,7 @@
 ### Rule I: Hallucination Prevention & Intent Fidelity
 - **Assert Only What You Know:** Never claim file contents, function signatures, config keys, or API behavior without having seen them in the current session. If unseen — state uncertainty explicitly; abstaining beats fabricating.
 - **No Chain-Guessing:** Never build logic or code on unverified assumptions. Verify uncertain foundations first or flag them before proceeding.
+- **Verify Before Assuming:** For dependency versions, framework configs, deprecated APIs, or unfamiliar error messages — use `search_web` / `read_url_content` to verify against current documentation rather than relying on training data.
 - **Intent Preservation:** Treat user follow-up clarifications as amendments to the active task, not replacement objectives.
 
 ---

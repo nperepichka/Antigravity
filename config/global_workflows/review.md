@@ -91,7 +91,8 @@ Evaluate the diff against the complete multi-dimensional audit dimensions:
 - **Breaking Changes:** Verify that signature changes, default parameter modifications, or altered return types do not introduce compile errors or runtime regressions in unmodified files.
 
 #### 3.5 Performance & Resource Management
-- **Queries & Data Access:** N+1 query patterns, missing database indexes, unbounded queries (missing `LIMIT`/pagination).
+- **Queries & Data Access:** N+1 query patterns, missing database indexes, unbounded queries (missing `LIMIT`/pagination). Flag `OFFSET`/`SKIP` pagination on large or unbounded datasets; recommend keyset/cursor-based alternatives.
+- **Contract Drift:** When entity/DTO schemas changed in diff, verify all downstream mapping layers, API return types, and client interfaces are updated accordingly.
 - **Resource Leaks:** Proper disposal of streams, database connections, HTTP clients, and socket pools.
 - **Cancellation & Async:** Proper propagation of `CancellationToken` / context deadlines, avoiding blocking async calls (`.Result`, `.Wait()`, synchronous sleep inside async methods).
 

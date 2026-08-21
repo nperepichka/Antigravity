@@ -17,7 +17,7 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 ## Workflow Steps
 
 ### Step 1: Ingestion & Directory Setup
-1. **Ingest Requirements:** Parse prompts, task files (`task.md`, `specs/*.md`, `ADR.md`), or **PDF documents** (architectural designs, topologies, wireframes).
+1. **Ingest Requirements:** Parse prompts, task files (`task.md`, `specs/*.md`, `ADR.md`), **PDF documents** (architectural designs, topologies, wireframes), meeting transcripts, client briefs, or RFP sections.
 2. **Project State:** Classify as **Greenfield** (new setup, scaffolding, infra) or **Brownfield** (existing project, impact & compatibility analysis).
 3. **Directory Target:** Create `.local/tasks/<YYYY-MM-DD>_<task-slug>/` at project root.
 
@@ -39,7 +39,14 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 ---
 
 ### Step 3: Mandatory Solution Exploration & Trade-off Synthesis
-Before decomposing into phases, evaluate **2–3 distinct architectural approaches / design options** for the task to prevent premature commitments, minimize blast radius, and avoid overengineering:
+Before decomposing into phases, quantify requirements and evaluate architectural options:
+
+0. **NFR Quantification Gate (Pre-Architecture):**
+   - Scan raw requirements for vague non-functional statements ("fast", "reliable", "secure", "handles high load").
+   - Transform each into measurable metrics: p95/p99 latency (ms), target RPS, uptime % with RPO/RTO, concurrent user capacity, compliance standards.
+   - Document quantified NFRs in `00_overview.md`.
+
+Evaluate **2–3 distinct architectural approaches / design options** to prevent premature commitments, minimize blast radius, and avoid overengineering:
 
 1. **Divergent Ideation (2–3 Architectural Options):**
    - **Option A (Lightweight / Native / Minimalist):** Minimal/zero new dependencies, native language/platform features, lowest cognitive overhead and minimal diff.
@@ -53,6 +60,7 @@ Before decomposing into phases, evaluate **2–3 distinct architectural approach
    - **Cognitive Load & DX:** Is the resulting code easy to comprehend, navigate, and debug for other engineers 6+ months from now?
    - **Performance & Resource Footprint:** Latency, CPU/memory allocations, throughput, and connection/lock overhead.
    - **Testability:** Ease of writing isolated, deterministic unit and integration tests.
+   - **Edge Case & Failure Mode Coverage:** For features involving payments, webhooks, file uploads, or third-party APIs, synthesize ≥3 failure scenarios (duplicate delivery, timeout during state mutation, concurrent state conflicts) and evaluate each option's resilience.
 
 3. **Decision & Hybrid Synthesis Gate:**
    - Select either a clear winning option OR synthesize a **Hybrid Approach** combining the strengths of multiple options (e.g., lightweight native interfaces from Option A + robust error handling / resilience policies from Option B).
