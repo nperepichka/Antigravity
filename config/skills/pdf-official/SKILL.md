@@ -1,6 +1,6 @@
 ---
 name: pdf-official
-description: "Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms. When Claude needs to fill in a PDF form or programmaticall..."
+description: Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms programmatically.
 license: Proprietary. LICENSE.txt has complete terms
 risk: unknown
 source: community

@@ -1,11 +1,11 @@
 ---
 name: csharp-pro
-description: Master modern C# 12/13 and .NET 8/9 engineering. Covers high-performance memory management (Span, Memory, ArrayPool), concurrency (Channels, async streams), primary constructors, pattern matching, records, source generators, and enterprise SOLID architecture. Use when writing C# code, refactoring .NET applications, or optimizing performance.
+description: Master modern C# 12/13 and .NET 8/9/10 engineering. Covers high-performance memory management (Span, Memory, ArrayPool), concurrency (Channels, async streams), primary constructors, pattern matching, records, source generators, and enterprise SOLID architecture. Use when writing C# code, refactoring .NET applications, or optimizing performance.
 ---
 
 # Modern C# & .NET Engineering Guide
 
-Enterprise-grade guide for writing modern, high-performance, and type-safe C# applications using the latest capabilities of C# 12/13 and .NET 8/9.
+Enterprise-grade guide for writing modern, high-performance, and type-safe C# applications using the latest capabilities of C# 12/13 and .NET 8/9/10.
 
 ---
 

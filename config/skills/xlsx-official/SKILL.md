@@ -1,6 +1,6 @@
 ---
 name: xlsx-official
-description: "Comprehensive spreadsheet creation, editing, and analysis with support for formulas, formatting, data analysis, and visualization. When Claude needs to work with spreadsheets (.xlsx, .xlsm, .csv, ...."
+description: Comprehensive spreadsheet creation, editing, and analysis with support for formulas, formatting, financial modeling, data analysis, and visualization (.xlsx, .xlsm, .csv).
 license: Proprietary. LICENSE.txt has complete terms
 risk: unknown
 source: community

@@ -1,6 +1,6 @@
 ---
 name: pptx-official
-description: "Presentation creation, editing, and analysis. When Claude needs to work with presentations (.pptx files) for: (1) Creating new presentations, (2) Modifying or editing content, (3) Working with layo..."
+description: Comprehensive PowerPoint presentation creation, editing, and analysis (.pptx). Use when creating new slides, updating layout and styling, or analyzing presentation decks programmatically.
 license: Proprietary. LICENSE.txt has complete terms
 risk: unknown
 source: community

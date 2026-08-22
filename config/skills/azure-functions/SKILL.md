@@ -18,7 +18,7 @@ Production-grade development guide for building resilient, scalable, and cost-ef
 
 ---
 
-## 1. .NET 8/9 Isolated Worker Model
+## 1. .NET 8/9/10 Isolated Worker Model
 
 ### 1.1 Startup Configuration (`Program.cs`)
 ```csharp

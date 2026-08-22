@@ -1,6 +1,6 @@
 ---
 name: docx-official
-description: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. When Claude needs to work with professional document..."
+description: Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction from Microsoft Word (.docx) documents.
 license: Proprietary. LICENSE.txt has complete terms
 risk: unknown
 source: community

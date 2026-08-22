@@ -67,7 +67,7 @@ flowchart TD
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
     │   └── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
-    └── skills/                 # 35 спеціалізованих інженерних скілів (Domain Capabilities)
+    └── skills/                 # 29 спеціалізованих інженерних скілів (Domain Capabilities)
 ```
 
 ### Як підключити:
@@ -140,11 +140,11 @@ flowchart TD
 
 | Категорія | Включені скіли | Призначення |
 | :--- | :--- | :--- |
-| **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `architect-review`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming`, `domain-modeling`, `grill-me` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API, схем БД, доменне моделювання та стрес-тестування рішень |
-| **🤖 AI & Агенти** | `ai-agents-architect`, `ai-engineer`, `rag-engineer`, `prompt-engineering`, `antigravity-workflows` | Розробка автономних агентів, RAG-систем, оптимізація промптів та пам'яті |
-| **💻 Мови & Фреймворки** | `csharp-pro`, `dotnet-backend-patterns`, `typescript-expert`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
+| **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming`, `domain-modeling`, `grill-me` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API, схем БД, доменне моделювання та стрес-тестування рішень |
+| **🤖 AI & Агенти** | `ai-agents-architect`, `rag-engineer`, `prompt-engineering` | Розробка автономних агентів, RAG-систем, оптимізація промптів та пам'яті |
+| **💻 Мови & Фреймворки** | `csharp-pro`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
-| **🧪 Якість & Рефакторинг** | `clean-code`, `production-code-audit`, `testing-patterns` | Принципи Clean Code, аудит продакшн-якості, TDD та патерни тестування |
+| **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |
 | **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper) та сесій у Chrome (CDP) |
 | **📄 Документи & Звіти** | `pdf-official`, `docx-official`, `xlsx-official`, `pptx-official` | Програмна генерація та аналіз PDF, DOCX, XLSX та PPTX документів |
 
