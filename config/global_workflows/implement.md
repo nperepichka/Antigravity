@@ -69,7 +69,7 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
    - *Security & Performance:* No leaks, concurrency hazards, unclosed handles, or bottlenecks.
 3. **Revert vs. Patch:**
    - *Minor issues:* Apply targeted patches and re-verify in Step 2.
-   - *Fundamental architectural flaws:* Revert affected components and re-implement cleanly. Never stack hacks on a broken foundation.
+   - *Fundamental architectural flaws / Dead-ends:* Perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`, preserving unrelated changes) and re-implement cleanly. Never stack hacks on a broken foundation.
 
 ---
 
@@ -86,4 +86,5 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 ---
 
 ## Circuit Breaker
-If an error, failing test, or rendering defect persists after **4–5 iterations**, halt immediately. Summarize root blocker, reproduction steps, and attempted fixes, then request user guidance.
+- **Progress-Driven Persistence:** Continue iterations as long as measurable progress is made (failing test count steadily decreasing, narrowing defect blast radius).
+- **Stagnation Stop:** If an error, failing test, or defect persists after **3–4 iterations without progress** (flapping tests, circular errors, zero defect reduction), halt immediately. Summarize root blocker, reproduction steps, and attempted fixes, then request user guidance.

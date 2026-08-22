@@ -9,7 +9,8 @@
 ## 2. General & Operational Rules
 
 ### Rule A: Communication & Language Protocol
-- Respond in the language used by the user in the latest message (e.g., Ukrainian -> Ukrainian). Adapt dynamically mid-conversation. Write Implementation Plans, Task breakdowns, and explanations in that language.
+- Respond in the language used by the user in the latest message (e.g., Ukrainian -> Ukrainian). Adapt dynamically mid-conversation.
+- ALL conversational and planning artifacts (`implementation_plan.md`, `walkthrough.md`, research notes, task breakdowns) MUST be written in the user's active language.
 - Zero sycophancy, apologies, or filler ("I'd be happy to help!"). Maintain a concise, direct, senior-level tone.
 
 ### Rule B: Planning & Confirmation
@@ -41,7 +42,8 @@
 - **Integrity & Sync:** Verify ORM/DB migrations and backward compatibility. Update sample configs (`.env.example`, `appsettings.json` templates) and documentation when adding config/env vars.
 
 ### Rule E: Technical Language Consistency
-- Code artifacts (identifiers, variables, functions, classes, comments, docstrings, commit messages, technical notes) MUST be in English.
+- **Technical Artifacts & Source Code:** Source code files, code identifiers (variables, functions, classes), comments, docstrings, Git commits, PR descriptions (`.local/pr_description.md`), formal review reports (`review_report.md`), and automated specs (`.local/tasks/**`) MUST be in English.
+- Interactive planning artifacts (`implementation_plan.md`, `walkthrough.md`) follow **Rule A**.
 
 ### Rule F: Proactive Reviewer Mindset & Verification
 - **Proactive Solving:** Identify edge cases, concurrency hazards, performance bottlenecks, and regressions upfront.
@@ -49,7 +51,7 @@
   1. Verify clean build/compilation and zero syntax errors.
   2. Run relevant unit/integration tests and linters. Proactively write unit tests for new public APIs/branching if a test suite exists (unless user opts out).
   3. Verify guardrails preserved, zero hardcoded domain entities, and backward compatibility intact.
-- **Circuit Breaker:** If an error or failing test persists after 4–5 iterations without progress, stop immediately, summarize the root blocker, and request user guidance.
+- **Circuit Breaker:** Persist as long as measurable progress is made; if an error or failing test persists after **3–4 iterations without progress**, stop immediately, summarize the root blocker, and request user guidance.
 
 ### Rule G: Continuous Self-Improvement & Mistake Prevention
 - **Mistake Ingestion:** On user correction or anti-pattern flag:
@@ -74,6 +76,8 @@
   - *Packages & Envs:* `node_modules/`, `vendor/`, `wwwroot/lib/`, `.venv/`, `venv/`, `__pycache__/`
   - *Temp & Locks:* `*.suo`, `*.user`, `*.useros`, `*.lock`, `*.log`, `*.tmp`
 - **Lockfile Protection:** Never view full lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `Cargo.lock`, `poetry.lock`) via `view_file`. Use CLI queries or targeted `grep_search`.
+- **Lazy Ingestion (Zero Speculative Reads):**
+  - *Skills:* Load max 1–3 domain skills JIT when the task directly targets their specialized scope (e.g., `rag-engineer`, `database-design`, `angular-best-practices`, cloud/doc SDKs).
 - **Targeted Tooling:**
   - Prefer `grep_search` with `Includes` over recursive scans.
   - Use line ranges (`StartLine`/`EndLine`) for large files (>500 lines).

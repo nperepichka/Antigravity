@@ -48,7 +48,7 @@ Write the distilled knowledge to **`.local/checkpoint.md`** using the structured
 **Important Handoff Additions:** 
 - **Redact** any sensitive information (API keys, passwords, PII) replacing them with `<REDACTED>`.
 - If the user passed arguments (e.g. `/checkpoint save "Focus on auth next"`), treat them as a description of what the next session will focus on and tailor the pending items accordingly.
-- Suggest specific Antigravity skills that the next agent should load based on the pending tasks.
+- Suggest max 1–3 skills strictly matching pending tasks (omit generic meta-skills for routine coding per **Rule H**).
 
 ```markdown
 # Session Checkpoint: [YYYY-MM-DD HH:mm]

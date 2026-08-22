@@ -54,7 +54,8 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 ### Step 4: Surgical Fix & Verification (Green Phase)
 1. **Minimal Patch:** Apply the minimal robust fix directly resolving the root cause. Avoid symptom-masking workarounds.
 2. **Fast Inner Loop:** Re-run reproduction test until **100% green**.
-3. **Full Regression Gate:** Run full project build, typecheck, lint, and test suite. Resolve any breakages until the entire suite is green.
+3. **Hypothesis Reversion Gate:** If an attempted fix fails or introduces regressions, perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`) before testing alternative hypotheses. Never accumulate broken edits.
+4. **Full Regression Gate:** Run full project build, typecheck, lint, and test suite. Resolve any breakages until the entire suite is green.
 
 ---
 
@@ -72,4 +73,5 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 ---
 
 ## Circuit Breaker
-If the bug cannot be reproduced or fixed after **4–5 iterations**, halt immediately. Summarize evaluated hypotheses, repro logs, and root blockers, then request user guidance.
+- **Progress-Driven Persistence:** Continue iterations as long as measurable progress is made (narrowing hypotheses, isolating faulty sub-paths, decreasing failing assertions).
+- **Stagnation Stop:** If the bug cannot be reproduced or fixed after **3–4 iterations without progress** (flapping tests, circular errors, exhausted hypotheses), halt immediately. Summarize evaluated hypotheses, repro logs, and root blockers, then request user guidance.
