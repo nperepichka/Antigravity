@@ -67,7 +67,7 @@ flowchart TD
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
     │   └── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
-    └── skills/                 # 33 спеціалізовані інженерні скіли (Domain Capabilities)
+    └── skills/                 # 35 спеціалізованих інженерних скілів (Domain Capabilities)
 ```
 
 ### Як підключити:
@@ -140,7 +140,7 @@ flowchart TD
 
 | Категорія | Включені скіли | Призначення |
 | :--- | :--- | :--- |
-| **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `architect-review`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API та схем БД |
+| **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `architect-review`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming`, `domain-modeling`, `grill-me` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API, схем БД, доменне моделювання та стрес-тестування рішень |
 | **🤖 AI & Агенти** | `ai-agents-architect`, `ai-engineer`, `rag-engineer`, `prompt-engineering`, `antigravity-workflows` | Розробка автономних агентів, RAG-систем, оптимізація промптів та пам'яті |
 | **💻 Мови & Фреймворки** | `csharp-pro`, `dotnet-backend-patterns`, `typescript-expert`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
