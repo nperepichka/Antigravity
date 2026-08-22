@@ -109,7 +109,7 @@ Use the corresponding structured template (all in **English**):
 - **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
 - **Template B `[MANUAL/DEVOPS]`:** Objective & Overview -> Step-by-Step Portal Navigation Guide -> Alternative CLI/IaC Commands -> Secrets & Output Variables Checklist -> Verification & Connectivity Test.
 - **Template C `[DATA]`:** Objective & Scope -> Prerequisites -> Idempotent Migration Script (with rollback & transactions) -> Validation Queries -> Definition of Done.
-- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff --staged` / `git diff HEAD` / `git diff <base>`) -> Test Environment Setup -> Test Scenarios -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
+- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff --staged` / `git diff HEAD` / `git diff <base>`) -> Test Environment Setup -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
 
 ---
 

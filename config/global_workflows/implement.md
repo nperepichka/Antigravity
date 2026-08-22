@@ -40,9 +40,10 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 
 - **2.0 Dependency Installation Gate:** If new packages are needed, request user confirmation (**Rule C**) specifying name, version, and reason.
 - **2.1 Build & Lint:** Run compilation, typechecking, and linters. Fix all errors/warnings before proceeding.
-- **2.2 Automated Testing & Live Execution:**
+- **2.2 Balanced Testing & Live Execution (Unit Coverage + Live Seam Check):**
+  - *Targeted Unit Test Coverage (Rule F):* Proactively write fast, focused unit tests covering new public APIs, logical branches, domain logic, and error paths. Structure tests at public seams and pure logic; avoid brittle multi-layered mock chains that test implementation details.
   - *Fast Inner Loop:* Run targeted tests for minimal changes (`dotnet test --filter`, `pytest ::`, `npm test -t`, `cargo test`). Run full module suites for broad changes.
-  - *Live Execution:* Execute entry points with realistic inputs. Run long-running servers as background tasks/daemons or via test runners with bounded timeouts.
+  - *Targeted Live Execution (Rule of One):* In addition to unit tests, execute at least **one linear real run** of the modified entry point (CLI command with realistic arguments, API request, or script) to verify runtime wiring, DI, configuration, and serialization without constructing heavy E2E test frameworks.
 - **2.3 Visual & Document Verification (Conditional — UI, PDF, DOCX, HTML, Images):**
   - Render output to PNG using Windows CLI (`pdftoppm`, LibreOffice headless CLI, Playwright) or Python fallback (`pymupdf`/`fitz`, `pdf2image`).
   - Visually inspect via multimodal vision (margins, alignment, typography, line wraps). Fix visual flaws iteratively.

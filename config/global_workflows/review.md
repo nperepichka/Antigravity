@@ -121,8 +121,8 @@ Evaluate the diff against the complete multi-dimensional audit dimensions:
   - Execute targeted single-run verification without blind exploration, monitoring console errors and network status.
 
 #### 3.9 Test Coverage & Quality
-- **Coverage:** New public methods, logical branches, and error paths covered by tests.
-- **Quality:** Meaningful assertions (no empty or assert-true-only tests), deterministic execution, zero flaky patterns, clean test state isolation.
+- **Coverage (Rule F):** New public methods, logical branches, and error paths covered by targeted unit tests.
+- **Quality & Balance:** Meaningful assertions (no empty or assert-true-only tests), deterministic execution, zero flaky patterns, clean test state isolation. Flag brittle over-mocking that tests mock wiring instead of real behavior. Verify that unit coverage is balanced with targeted live entry-point verification.
 
 #### 3.10 Dependencies, Supply Chain & CI/CD Audit
 - **Supply Chain:** Compatible open-source licenses, active package maintenance, zero known CVEs.
