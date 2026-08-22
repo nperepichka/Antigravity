@@ -23,6 +23,7 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
    - **Conditional Baseline Sanity Check:** At the very start of a session or when working in an unfamiliar/unverified environment (only when necessary, do not repeat across consecutive phase runs), run a quick baseline build/test to ensure the repo is green prior to edits. If broken, warn user upfront.
 2. **Task Ingestion & Skill Alignment:**
    - **Input Formats:** Prompts, issues, standalone task files (`task.md`, `prompt.md`, `specs/*.md`), PDFs, or `/investigate` phase/sub-phase files (`01_<name>.md`, `01a_<name>.md`).
+   - **Context & Conventions Ingestion:** Check `.agents/rules/repository-context.md` (if present) for non-obvious domain rules, conventions, and architectural guardrails.
    - **Skill Ingestion:** Check `00_overview.md`, task specifications, or stack requirements for recommended agent skills and activate them if available.
    - **Fast-Track (`/investigate` specs):** If prerequisites are met, **adopt Scope, Target Files, Context Snippets, and DoD directly as the approved plan** and skip to Step 2.
    - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) and obtain explicit user approval.
@@ -45,8 +46,9 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 - **2.3 Visual & Document Verification (Conditional — UI, PDF, DOCX, HTML, Images):**
   - Render output to PNG using Windows CLI (`pdftoppm`, LibreOffice headless CLI, Playwright) or Python fallback (`pymupdf`/`fitz`, `pdf2image`).
   - Visually inspect via multimodal vision (margins, alignment, typography, line wraps). Fix visual flaws iteratively.
-- **2.4 Schema, State & Full Regression Gate:**
+- **2.4 Schema, State, Config & Full Regression Gate:**
    - Verify ORM migrations (EF Core, Flyway, Liquibase, Drizzle, Prisma, Alembic) and client bindings.
+   - **Configuration & Env Sync (Rule D):** When introducing or altering environment variables or configuration keys, ensure `.env.example`, `appsettings.json` templates, and setup docs are strictly synchronized.
    - **Cross-Layer Contract Integrity:** When modifying Domain Entities or DTOs, verify cascading impact across mapping layers, API controller return types, OpenAPI schemas, and frontend client interfaces.
    - **Data Access Hotpath Audit:** Verify zero N+1 queries (no DB/API calls inside loops — use batch operations, projection queries, or eager includes). For new filtered queries or FK joins, ensure corresponding composite index migrations exist.
    - **Pagination Guard:** For datasets potentially exceeding 10K rows, enforce keyset/cursor-based pagination over OFFSET/SKIP.
@@ -74,7 +76,9 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 ### Step 4: Delivery & Artifacts
 1. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
 2. **Phase / Sub-Phase Tracking & Handoff:**
-   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality before providing the handoff link and ready `/implement` command.
+   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
+     - **Automated Next Phase (`[CODE]`, `[DATA]`, `[QA]`):** Provide clickable link and ready `/implement <next-phase>` command.
+     - **Manual Next Phase (`[MANUAL/DEVOPS]`):** Present portal navigation guide, cloud checklist, and output variables, then prompt user to complete manual steps before proceeding to dependent code phases.
    - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
 3. **User Summary:** Concise summary in user's conversational language (**Rule A**).
 4. **Context Hygiene Gate:** If 5+ phases/sub-phases have been completed and verified in the current session, proactively suggest `/checkpoint` to preserve progress before context degradation impacts quality.

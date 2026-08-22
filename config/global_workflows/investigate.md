@@ -39,32 +39,33 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 ---
 
 ### Step 3: Mandatory Solution Exploration & Trade-off Synthesis
-Before decomposing into phases, quantify requirements and evaluate architectural options:
+Quantify requirements and evaluate steelmanned architectural options before DAG decomposition:
 
-0. **NFR Quantification Gate (Pre-Architecture):**
-   - Scan raw requirements for vague non-functional statements ("fast", "reliable", "secure", "handles high load").
-   - Transform each into measurable metrics: p95/p99 latency (ms), target RPS, uptime % with RPO/RTO, concurrent user capacity, compliance standards.
-   - Document quantified NFRs in `00_overview.md`.
+1. **NFR Quantification Gate:**
+   - Scan raw requirements for vague statements ("fast", "reliable", "secure", "high load") and convert to hard metrics: p95/p99 latency (ms), target RPS, uptime % / RPO/RTO, concurrent user capacity, compliance standards. Record in `00_overview.md`.
 
-Evaluate **2–3 distinct architectural approaches / design options** to prevent premature commitments, minimize blast radius, and avoid overengineering:
+2. **Steelmanned Divergent Options (2–3 Production-Grade Alternatives):**
+   - **Strict Anti-Strawman Mandate:** NEVER present dummy, naive, or caricature options (e.g., no throwaway scripts without error handling or unjustified Kafka/microservices). Every option MUST be a realistic, production-viable architecture that a Staff/Principal Engineer would defend in an RFC, solving 100% of functional requirements and quantified NFRs.
+   - **Divergence Along Real Trade-off Axes (Tailored to Problem):**
+     - *Coupling & Execution:* In-process transactional pipeline (synchronous, direct consistency, zero infra overhead) vs. Asynchronous decoupled pipeline (event-driven, message broker/worker queue, background jobs).
+     - *State & Invariants:* Database-native enforcement (ACID, row locks, constraints, atomic CTEs) vs. Application-level domain orchestration (State Machine, Saga, Outbox, rich aggregate roots).
+     - *Modularity & Extensibility:* Cohesive vertical slice (minimal indirection, localized logic, rapid DX) vs. Decoupled pluggable architecture (Strategy/Adapter, extensible provider abstractions).
+     - *Infrastructure Primitives:* Zero-dependency platform-native primitives vs. Dedicated external managed services (e.g., in-memory locks vs Redis / cloud distributed locks).
 
-1. **Divergent Ideation (2–3 Architectural Options):**
-   - **Option A (Lightweight / Native / Minimalist):** Minimal/zero new dependencies, native language/platform features, lowest cognitive overhead and minimal diff.
-   - **Option B (Pattern-Rich / Extensible / Enterprise):** Established design patterns (Strategy, Pipeline, State Machine, CQRS), battle-tested libraries, high decoupling for future scale.
-   - **Option C (Alternative Paradigm):** Alternative execution/storage models (e.g., event-driven vs request-response, streaming vs batch, DB-level constraints vs application-level logic).
+3. **Comparative Evaluation Matrix (Mandatory Criteria):**
+   - **Completeness & NFR Alignment:** Quality of meeting scale, performance, and functional targets.
+   - **Operational Footprint & Cognitive Load:** Dependency burden, infra complexity, long-term maintainability/DX.
+   - **Failure Modes & Edge Case Resilience:** Synthesize ≥3 concrete failure scenarios (e.g., duplicate delivery, timeout during mutation, concurrent conflict/race) and assess handling.
+   - **Performance & Footprint:** Latency (p95/p99), memory/CPU allocations, connection pools, lock contention.
+   - **Blast Radius & Migration Risk:** Impacted modules, schema migration hazards, backward compatibility.
+   - **Testability & Determinism:** Ease of isolated, fast unit/integration testing without complex harnesses.
 
-2. **Comparative Evaluation Matrix (Mandatory Criteria):**
-   - **Requirement Completeness:** Does this option fulfill 100% of functional & non-functional requirements without hacky workarounds?
-   - **Anti-Overengineering & Parsimony (KISS / YAGNI):** Is the solution appropriately sized, or does it introduce unnecessary abstractions, premature generalizations, or bloated dependencies?
-   - **Blast Radius & Regression Risk:** How many modules, schemas, or existing tests are impacted?
-   - **Cognitive Load & DX:** Is the resulting code easy to comprehend, navigate, and debug for other engineers 6+ months from now?
-   - **Performance & Resource Footprint:** Latency, CPU/memory allocations, throughput, and connection/lock overhead.
-   - **Testability:** Ease of writing isolated, deterministic unit and integration tests.
-   - **Edge Case & Failure Mode Coverage:** For features involving payments, webhooks, file uploads, or third-party APIs, synthesize ≥3 failure scenarios (duplicate delivery, timeout during state mutation, concurrent state conflicts) and evaluate each option's resilience.
-
-3. **Decision & Hybrid Synthesis Gate:**
-   - Select either a clear winning option OR synthesize a **Hybrid Approach** combining the strengths of multiple options (e.g., lightweight native interfaces from Option A + robust error handling / resilience policies from Option B).
-   - Formulate clear architectural justification and document it in the master plan.
+4. **Dialectical Architecture Synthesis (Hybrid Blueprint):**
+   - Avoid simplistic winner-picking. Actively synthesize an optimal blueprint:
+     - **Strengths Extraction:** Extract the strongest traits of each option (e.g., Option 1's low-latency data path + Option 2's resilient state transition handling).
+     - **Layer-by-Layer Decision Matrix:** Map explicit choices across Data/Concurrency, Domain Logic, Resiliency/Retries, and API Contracts.
+     - **Target Synthesis Blueprint:** Formulate the unified design (hybrid or justified dominant path) combining strengths and eliminating weaknesses.
+     - **Rejection Rationale:** Explicitly document technical grounds for any discarded trade-off (e.g., excessive lock contention, unneeded network hop, operational dependency).
 
 ---
 
@@ -87,7 +88,10 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 
 #### 5.1 Master Plan (`00_overview.md`)
 - **System Architecture & Context:** Solution summary + Mermaid diagrams.
-- **Architecture Decisions & Trade-off Synthesis:** Mandatory comparative table of considered approaches (Options A/B/C), scores against criteria (Completeness, Anti-Overengineering, Blast Radius, DX, Performance, Testability), and detailed rationale for the chosen or hybrid path.
+- **Steelmanned Architecture Options & Synthesis:**
+  - Table of considered steelmanned approaches (Options A/B/C) evaluated across the 6 mandatory criteria.
+  - Layer-by-layer architectural decision mapping (Data/Concurrency, Domain Logic, Resiliency, API Contracts).
+  - Detailed rationale for the synthesized target architecture and why specific trade-offs were chosen or rejected.
 - **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
 - **Execution Matrix (DAG):** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`).
 - **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
