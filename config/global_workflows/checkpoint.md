@@ -44,7 +44,11 @@ Decompose the session findings into four structured dimensions (supports multipl
 2. **User Confirmation:** Allow the user to select items to persist, uncheck ephemeral discussion noise, or supply write-in notes.
 
 #### Step 4: Checkpoint Artifact Generation
-Write the distilled knowledge to **`.local/checkpoint.md`** using the structured template below (in **English** per **Rule E**):
+Write the distilled knowledge to **`.local/checkpoint.md`** using the structured template below (in **English** per **Rule E**). 
+**Important Handoff Additions:** 
+- **Redact** any sensitive information (API keys, passwords, PII) replacing them with `<REDACTED>`.
+- If the user passed arguments (e.g. `/checkpoint save "Focus on auth next"`), treat them as a description of what the next session will focus on and tailor the pending items accordingly.
+- Suggest specific Antigravity skills that the next agent should load based on the pending tasks.
 
 ```markdown
 # Session Checkpoint: [YYYY-MM-DD HH:mm]
@@ -70,6 +74,10 @@ Write the distilled knowledge to **`.local/checkpoint.md`** using the structured
 ## 4. Pending Items & Immediate Next Steps
 1. [Actionable next step for Workstream 1].
 2. [Actionable next step for Workstream 2].
+
+## 5. Suggested Skills
+- [Skill Name 1]: [Brief reason why the next agent should use this skill]
+- [Skill Name 2]: [Brief reason why the next agent should use this skill]
 ```
 
 #### Step 5: Handoff Instructions

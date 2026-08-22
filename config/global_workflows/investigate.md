@@ -79,8 +79,11 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
    - Integration/E2E test suites, performance benchmarks, and security checks.
    - **Mandatory `/review` Integration:** Audit feature diff with `/review`. Triage `🔴 Must Fix` / `🟡 Should Fix` with surgical patches until `🟢 APPROVED`.
    - **Milestone & Final QA:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases. **CRITICAL:** The entire master plan MUST always conclude with a final `[QA]` phase. Never skip the final review.
-5. **Recursive Decomposition (Sub-phases):** If the user asks to investigate a specific large phase (e.g., `/investigate phase 2`), decompose it into atomic, highly granular sub-phases (e.g., `02a_<name>.md`, `02b_<name>.md`). Each sub-phase must be small enough to be implemented flawlessly by `/implement`.
-6. **DAG Validation & Shared Contracts:** Validate acyclic order (DAG). Extract shared cross-cutting concerns (auth, logging, config) into prerequisite phases or document in `00_overview.md`.
+5. **Recursive Decomposition (Sub-phases):** If the user asks to investigate a specific large phase (e.g., `/investigate phase 2`), decompose it into atomic, highly granular sub-phases (e.g., `02a_<name>.md`, `02b_<name>.md`). Each sub-phase must be small enough to be implemented flawlessly by `/implement` (acting as actionable "tracer-bullet" tickets).
+6. **Multi-Session Scaling (Frontier vs Fog of War):** For massive chunks of work that span multiple agent sessions, use `00_overview.md` as the shared map:
+   - **The Frontier:** The immediate, actionable sub-phases whose prerequisites are settled. Generate full phase markdown files for these.
+   - **The Fog of War (Not Yet Specified):** Work that is in-scope but whose exact details depend on the frontier being resolved. Keep these as high-level items in the `00_overview.md` Execution Matrix, but do NOT generate individual phase markdown files for them yet. As the frontier is resolved, graduate this fog into new phase files.
+7. **DAG Validation & Shared Contracts:** Validate acyclic order (DAG). Extract shared cross-cutting concerns (auth, logging, config) into prerequisite phases or document in `00_overview.md`.
 
 ---
 
@@ -93,7 +96,8 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
   - Layer-by-layer architectural decision mapping (Data/Concurrency, Domain Logic, Resiliency, API Contracts).
   - Detailed rationale for the synthesized target architecture and why specific trade-offs were chosen or rejected.
 - **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
-- **Execution Matrix (DAG):** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`).
+- **Execution Matrix (DAG & Shared Map):** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`). For massive projects, demarcate the "Frontier" (live phase files) from the "Fog of War" (unspecified future phases).
+- **Out of Scope:** Explicitly list work ruled out of this effort to bound the fog of war.
 - **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
 - **Shared Data Contracts:** DTO schemas, interfaces, event payloads.
 

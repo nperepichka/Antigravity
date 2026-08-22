@@ -10,10 +10,10 @@ source: community
 ## Testing Philosophy
 
 **Test-Driven Development (TDD):**
-- Write failing test FIRST
-- Implement minimal code to pass
-- Refactor after green
-- Never write production code without a failing test
+- **Red before green**: Write failing test FIRST, then implement minimal code to pass.
+- **One slice at a time (Vertical Slicing)**: Work in vertical slices (one seam, one test, one implementation). Avoid horizontal slicing (writing all tests first, then all implementation).
+- **Refactor after green**: Refactoring is not part of the red->green loop. It belongs to the review stage.
+- **Test at Seams**: A seam is the public boundary you test at. Tests live at seams, never against internals. Agree on seams before writing tests.
 
 **Behavior-Driven Testing:**
 - Test behavior, not implementation

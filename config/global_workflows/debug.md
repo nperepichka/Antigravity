@@ -26,6 +26,7 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 ### Step 2: Deterministic Reproduction Gate (Red Phase)
 *Must complete before modifying ANY production code:*
 1. **Isolated Repro Test & State Isolation:** Add a targeted unit/integration test reproducing the exact failure (or minimal repro script). Ensure strict state isolation (rollback transactions, in-memory DB, reset mocks/env in `tearDown`) to prevent flaky test pollution.
+2. **Minimization (The Tight Loop):** Shrink the repro to the smallest scenario that still goes red (cut inputs, callers, config one at a time). Every remaining element must be load-bearing for the failure. A minimal repro shrinks the hypothesis space and becomes a clean regression test.
 2. **Execute & Confirm Failure:** Run using fast targeted runners:
    - `.NET:` `dotnet test --filter ...`
    - `Python:` `pytest path/to/test.py::test_func`
@@ -42,7 +43,11 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
    - *Zero & Boundary States:* `null`/`undefined`/`None`, `0`, empty collections, max bounds, empty strings.
    - *Failure & Async Propagation:* Swallowed exceptions, unhandled Promise rejections, hanging threads, missing timeouts.
    - *State & Resource Consistency:* Unclosed stream/socket handles, uncommitted/unrolled transactions, race conditions on shared state.
-2. **Hypothesis Validation:** Formulate 1–2 precise hypotheses for *why* the defect occurs. Verify against the failing repro test and code ranges. **Ground each hypothesis in observed code/output — never hypothesize based on assumed behavior of unverified functions, configs, or library internals (Rule I).**
+2. **Hypothesis Generation & Targeted Instrumentation:** 
+   - Generate 3–5 ranked, **falsifiable** hypotheses before testing any of them (single-hypothesis generation anchors on the first idea). 
+   - State predictions (e.g., "If X is the cause, changing Y will make the bug disappear").
+   - Instrument targeted probes (use debugger breakpoints or tagged logs like `[DEBUG-a4f2]`) to test hypotheses one variable at a time. Clean up all tagged logs before completion.
+   - **Ground each hypothesis in observed code/output — never hypothesize based on assumed behavior of unverified functions, configs, or library internals (Rule I).**
 
 ---
 

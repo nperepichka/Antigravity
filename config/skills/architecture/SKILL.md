@@ -45,6 +45,16 @@ source: community
 
 ---
 
+## Codebase Design (Deep Modules)
+
+When structuring modules and interfaces, optimize for **leverage** (for callers) and **locality** (for maintainers):
+- **Deep Modules**: A lot of behavior behind a small interface. (e.g. `processOrder(order)` instead of 10 micro-steps).
+- **Interfaces over Implementations**: The interface is everything a caller must know (signatures, invariants, errors). Hide the complex implementation.
+- **Test at Seams**: A seam is where you can alter behavior without editing in that place. Tests and callers should cross the exact same external seam.
+- **Design for Testability**: Accept dependencies (injection), return results instead of side effects, and keep the interface surface area small.
+
+---
+
 ## Validation Checklist
 
 Before finalizing architecture:
