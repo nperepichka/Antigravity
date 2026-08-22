@@ -11,6 +11,7 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
 ## Core Directives
 
 - **Strict Read-Only Guarantee:** ZERO unsolicited code edits, state-altering Git commands (`checkout`, `reset`, `merge`, `pull`), or package installations. Permitted: `git diff`, `git log`, `git show`, `git status`, and isolated in-memory verification runners (REPL/eval).
+- **Clean Context & Unanchored Review:** Operate with an isolated, fresh context (ingesting only task specs, extracted diff, and repository rules). Discard conversational trial-and-error baggage, justifications, and intermediate rationalizations from implementation sessions to ensure an objective, adversarial audit.
 - **Bidirectional Reconciliation:** Reconcile requirements to code diff two-ways:
   1. *Forward Audit (Coverage):* Ensure 100% of explicit/implicit requirements map to concrete diff logic.
   2. *Backward Audit (Scope Control):* Ensure 0% unrequested changes, dead code, or side-effect edits exist in the diff.
@@ -25,25 +26,30 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
 ### Step 1: Task Context & Diff Resolution
 
 #### 1.1 Task Context Ingestion & Requirement Atomization
-1. **Locate Task Context:** Parse active prompt, issue tracker ticket, `task.md`, specification files (`specs/*.md`), or `/investigate` phase specs (`01_<phase>.md`).
+1. **Locate Task Context (Single or Multi-Phase):**
+   - *Single Phase/Task:* Active prompt, issue ticket, `task.md`, specification file (`specs/*.md`), or `/investigate` phase spec (`01_<phase>.md`).
+   - *Multi-Phase / Milestone Scope:* Ingest multiple phase specs simultaneously (e.g., `01_<phase>.md` + `02_<phase>.md` or `00_overview.md`) when reviewing cumulative batches.
 2. **Context Guard (Mandatory Stop):**
    - If task goals, constraints, or acceptance criteria are missing or ambiguous and required for bidirectional reconciliation, **HALT** immediately.
    - Prompt user: *"Please provide the exact acceptance criteria / task requirements to enable bidirectional verification."*
 3. **Requirement Atomization:**
-   - Deconstruct task into an explicit, numbered list:
-     - `[REQ-1]`: Primary functional requirement
-     - `[REQ-2]`: Specific edge case, boundary state, or constraint
-     - `[REQ-N]`: Non-functional / contract requirement (e.g., error schema, performance, idempotency, backward compatibility)
+   - Deconstruct ingested task(s) into an explicit, numbered list (namespaced by phase when multi-task):
+     - Single task: `[REQ-1]`, `[REQ-2]`, `[REQ-N]`
+     - Multi-task / Multi-phase: `[REQ-P1-1]`, `[REQ-P1-2]`, `[REQ-P2-1]`, `[REQ-GLOBAL-1]`
+     - Cover: functional requirements, edge cases, zero/boundary states, and non-functional contracts (error schema, performance, idempotency, backward compatibility).
 
-#### 1.2 Target Resolution & Diff Extraction
-1. **Target Identification:**
-   - *Branch Comparison:* `git diff <base>...<target>` (e.g., `git diff main...feature`)
-   - *Commit Range:* `git diff HEAD~N..HEAD`
-   - *Working Tree (Default):* `git diff HEAD`
+#### 1.2 Target Resolution & Multi-State Diff Extraction
+1. **Target State Identification (Staged, Uncommitted, or Committed):**
+   - *Working Tree Status Check:* Run `git status -s` to assess tracked, staged, and unstaged modifications.
+   - *Staged Changes (Common for verified phases):* `git diff --staged` (or `git diff --cached`) when completed sub-phases have been staged.
+   - *Working Tree + Staged (Uncommitted multi-task pool):* `git diff HEAD` (captures all uncommitted and staged modifications across multiple phases).
+   - *Cumulative Branch Diff (Full feature vs Base):* `git diff <base_branch>` (e.g., `git diff main` or `git diff develop`) capturing all committed + staged + working tree changes.
+   - *Branch Comparison:* `git diff <base>...<target>` (e.g., `git diff main...feature`).
+   - *Commit Range:* `git diff HEAD~N..HEAD` or `git diff <base_commit>..<target_commit>`.
 2. **Diff & History Extraction:**
-   - Modified files summary: `git diff --name-status <base>...<target>`
-   - Full unified diff: `git diff <base>...<target>`
-   - Intent log: `git log -n 10 --oneline <base>..<target>`
+   - Modified files summary: `git diff --name-status <target_expression>` (e.g., `git diff --name-status --staged` or `git diff --name-status HEAD`).
+   - Full unified diff: `git diff <target_expression>`.
+   - Intent log (if committed): `git log -n 10 --oneline <base>..<target>`.
 3. **Context Deep-Dive:** Inspect surrounding source code using range-limited `view_file` to evaluate caller context.
 4. **Large Diff Triage (>1000 lines):** Prioritize: Security (auth/crypto/APIs) -> Data Models/Schema -> Business Logic -> Infrastructure/Config -> Tests -> Formatting/Renames.
 

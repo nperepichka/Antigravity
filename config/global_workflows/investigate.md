@@ -75,8 +75,10 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 1. **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
 2. **`[MANUAL/DEVOPS]` (Cloud/Infra):** Cloud provisioning, portal config, OAuth/IdP app registration, DNS/SSL, secret vaults (Key Vault, Secrets Manager), webhooks.
 3. **`[DATA]` (Data Migrations):** Idempotent transformations/backfills (`IF NOT EXISTS`, transactional) with rollback scripts and validation queries.
-4. **`[QA]` (E2E Verification & `/review`):**
+4. **`[QA]` (E2E Verification, Clean-Context Subagents & `/review`):**
    - Integration/E2E test suites, performance benchmarks, and security checks.
+   - **Clean Context & Subagent Gate:** Execute QA and code review with an isolated, fresh context (delegating to a clean subagent or running in a clean session) to eliminate implementation anchoring bias and self-verification blind spots.
+   - **Multi-Phase & Cumulative Scope:** Milestone QA and Final QA may audit uncommitted or staged (`git diff --staged` / `git diff HEAD`) code accumulated across multiple preceding sub-phases (`01..03`) or against the base branch (`git diff <base>`), reconciling all covered phase specifications simultaneously.
    - **Mandatory `/review` Integration:** Audit feature diff with `/review`. Triage `🔴 Must Fix` / `🟡 Should Fix` with surgical patches until `🟢 APPROVED`.
    - **Milestone & Final QA:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases. **CRITICAL:** The entire master plan MUST always conclude with a final `[QA]` phase. Never skip the final review.
 5. **Recursive Decomposition (Sub-phases):** If the user asks to investigate a specific large phase (e.g., `/investigate phase 2`), decompose it into atomic, highly granular sub-phases (e.g., `02a_<name>.md`, `02b_<name>.md`). Each sub-phase must be small enough to be implemented flawlessly by `/implement` (acting as actionable "tracer-bullet" tickets).
@@ -107,7 +109,7 @@ Use the corresponding structured template (all in **English**):
 - **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
 - **Template B `[MANUAL/DEVOPS]`:** Objective & Overview -> Step-by-Step Portal Navigation Guide -> Alternative CLI/IaC Commands -> Secrets & Output Variables Checklist -> Verification & Connectivity Test.
 - **Template C `[DATA]`:** Objective & Scope -> Prerequisites -> Idempotent Migration Script (with rollback & transactions) -> Validation Queries -> Definition of Done.
-- **Template D `[QA]`:** Objective & Scope -> Test Environment Setup -> Test Scenarios -> Execution Commands -> Automated Code Review Gate (`/review`) -> Triage & Remediation Protocol -> Definition of Done.
+- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff --staged` / `git diff HEAD` / `git diff <base>`) -> Test Environment Setup -> Test Scenarios -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
 
 ---
 

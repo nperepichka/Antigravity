@@ -67,21 +67,27 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 2. **Holistic Self-Audit:**
    - *SOLID & Cleanliness:* Production-ready, maintainable, no hacky workarounds.
    - *Security & Performance:* No leaks, concurrency hazards, unclosed handles, or bottlenecks.
-3. **Revert vs. Patch:**
+3. **Clean Context Review Gate (Subagents & `/review`):**
+   - Self-audit is necessary for immediate bug catching, but prone to anchoring bias. For thorough security, contract, and multi-phase audits, delegate review to an isolated clean subagent or trigger a decoupled `/review` session passing only the task specs and staged diff.
+4. **Revert vs. Patch:**
    - *Minor issues:* Apply targeted patches and re-verify in Step 2.
    - *Fundamental architectural flaws / Dead-ends:* Perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`, preserving unrelated changes) and re-implement cleanly. Never stack hacks on a broken foundation.
 
 ---
 
 ### Step 4: Delivery & Artifacts
-1. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
-2. **Phase / Sub-Phase Tracking & Handoff:**
+1. **Intermediate Staging Handshake (Multi-Phase Hygiene):**
+   - After Phase I & II verification passes for a given phase/sub-phase, stage all verified modified and new files (`git add <files>`).
+   - Staging keeps cumulative progress clean, distinct from scratch files, and immediately ready for multi-phase diff extraction (`git diff --staged`) during subsequent Milestone/Final `[QA]` reviews.
+2. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
+3. **Phase / Sub-Phase Tracking & Handoff:**
    - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
-     - **Automated Next Phase (`[CODE]`, `[DATA]`, `[QA]`):** Provide clickable link and ready `/implement <next-phase>` command.
+     - **Automated Next Phase (`[CODE]`, `[DATA]`):** Provide clickable link and ready `/implement <next-phase>` command.
+     - **Next Phase `[QA]` (Milestone / Final Review):** Clearly state the cumulative list of covered phases (e.g., `01`, `02`) and provide ready `/review` command targeting `git diff --staged` or `git diff HEAD` under clean context.
      - **Manual Next Phase (`[MANUAL/DEVOPS]`):** Present portal navigation guide, cloud checklist, and output variables, then prompt user to complete manual steps before proceeding to dependent code phases.
    - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
-3. **User Summary:** Concise summary in user's conversational language (**Rule A**).
-4. **Context Hygiene Gate:** If 5+ phases/sub-phases have been completed and verified in the current session, proactively suggest `/checkpoint` to preserve progress before context degradation impacts quality.
+4. **User Summary:** Concise summary in user's conversational language (**Rule A**).
+5. **Context Hygiene Gate:** If 5+ phases/sub-phases have been completed and verified in the current session, proactively suggest `/checkpoint` to preserve progress before context degradation impacts quality.
 
 ---
 
