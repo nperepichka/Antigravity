@@ -67,7 +67,7 @@ flowchart TD
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
     │   └── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
-    └── skills/                 # 29 спеціалізованих інженерних скілів (Domain Capabilities)
+    └── skills/                 # 30 спеціалізованих інженерних скілів (Domain Capabilities)
 ```
 
 ### Як підключити:
@@ -146,5 +146,5 @@ flowchart TD
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
 | **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |
 | **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper) та сесій у Chrome (CDP) |
-| **📄 Документи & Звіти** | `pdf-official`, `docx-official`, `xlsx-official`, `pptx-official` | Програмна генерація та аналіз PDF, DOCX, XLSX та PPTX документів |
+| **📄 Документи & Технічна література** | `pdf-official`, `docx-official`, `xlsx-official`, `pptx-official`, `technical-book-writer` | Програмна генерація/аналіз PDF/DOCX/XLSX/PPTX та проєктування й написання технічних книг |
 
