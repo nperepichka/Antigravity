@@ -1,0 +1,7 @@
+{
+  "name": "browser-to-api",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Discover OpenAPI 3.1 specs from browser HTTP traffic and HAR files (100% local, no Browserbase required)"
+}

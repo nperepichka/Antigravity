@@ -145,6 +145,7 @@ flowchart TD
 | **💻 Мови & Фреймворки** | `csharp-pro`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
 | **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |
-| **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper) та сесій у Chrome (CDP) |
+| **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture`, `browser-to-api` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper), сесій у Chrome (CDP) та виведення OpenAPI 3.1 специфікацій і SDK з HTTP/HAR трафіку |
 | **📄 Документи & Технічна література** | `pdf-official`, `docx-official`, `xlsx-official`, `pptx-official`, `technical-book-writer` | Програмна генерація/аналіз PDF/DOCX/XLSX/PPTX та проєктування й написання технічних книг |
+
 
