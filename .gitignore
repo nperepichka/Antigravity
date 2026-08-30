@@ -1,0 +1,7 @@
+# Local runtime tasks, specs, checkpoints, and explorations
+.local/
+
+# OS / Temporary files
+.DS_Store
+Thumbs.db
+*.tmp

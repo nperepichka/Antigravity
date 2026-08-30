@@ -40,6 +40,7 @@ Analyze the unified diff and group modifications by functional layer:
 - **API / Transport:** Endpoints, request/response DTOs, middleware, routes.
 - **Data & Persistence:** Database migrations, repository queries, ORM entity configurations.
 - **Configuration & Infra:** New environment variables (`.env.example`, `appsettings.json`), Docker/CI adjustments.
+- **Documentation & Specs:** Updated `README.md`, OpenAPI/API contracts, ADRs, architecture diagrams, or setup guides.
 - **Breaking Changes:** Any altered public contracts, deprecated parameters, or non-reversible database schema changes.
 
 ---
@@ -60,6 +61,8 @@ Brief 1–3 sentence explanation of the problem solved, feature added, or bug fi
   - Another key detail.
 - **<Component / Layer>:**
   - Concise bullet describing specific change.
+- **Documentation & Specs (if modified):**
+  - Updated [README.md / API specs / ADRs] reflecting new contracts or capabilities.
 
 <!-- Include only if breaking changes or migrations exist -->
 ## Breaking Changes & Migration Notes

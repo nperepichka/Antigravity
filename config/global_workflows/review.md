@@ -17,6 +17,7 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
   2. *Backward Audit (Scope Control):* Ensure 0% unrequested changes, dead code, or side-effect edits exist in the diff.
 - **Static & Abstract Flow Proof:** Analytically verify data flows, boundary conditions, and failure propagation across all branching paths without requiring a full environment or UI spin-up.
 - **Actionable Critique:** Every finding must cite exact file path, line numbers, risk explanation, and a concrete ````diff```` fix.
+- **Documentation & Contract Synchronization:** Verify that any changes affecting public API shapes, data models, environment variables, database schemas, CLI flags, or architectural flows are accurately reflected in the project's documentation (`README.md`, OpenAPI specs, ADRs, setup runbooks, code docstrings).
 - **Verified References Only (Rule I):** Every file path, line number, function name, and code snippet cited in the report MUST be sourced from actual `git diff`, `view_file`, or `grep_search` output. Never cite phantom locations or fabricate snippets from memory.
 
 ---
@@ -129,6 +130,10 @@ Evaluate the diff against the complete multi-dimensional audit dimensions:
 - **Pinning:** Deterministic version constraints (no wildcard `*` or floating `latest`).
 - **CI/CD Workflows:** (`.github/workflows/`, `azure-pipelines.yml`, `Dockerfile`) Ensure security gates, linters, or test suites are not bypassed, disabled, or over-permissioned.
 
+#### 3.11 Documentation & Contract Drift Synchronization
+- **Documentation Currency:** If public APIs, environment variables, configuration schemas, CLI commands, database migrations, or core domain workflows are modified, verify whether relevant documentation (`README.md`, docs, OpenAPI/Swagger specifications, ADRs, architecture diagrams, setup guides) has been updated in the diff or flagged if missing.
+- **Docstring & API Comments Integrity:** Ensure code-level docstrings and parameter comments accurately reflect updated logic and edge cases without stale or obsolete explanations.
+
 ---
 
 ## Step 4: Report Generation & Verification Artifacts
@@ -150,6 +155,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 - [x] **Scope Integrity:** 0 unrequested changes or side-effect edits in diff.
 - [x] **Blast Radius:** All upstream/downstream callers statically checked for regressions.
 - [x] **Contract & Type Safety:** Downstream signatures and contracts preserved without breaks.
+- [x] **Documentation Sync:** Project docs (README, API specs, ADRs, config templates) verified and synchronized with code changes.
 - [x] **Invariant Proof:** All failure/edge branches analytically resolved without leaks or unhandled errors.
 - [x] **Zero-Runtime Guarantee:** Core logic verified analytically without requiring full environment spin-up.
 
@@ -158,7 +164,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 #### 🔴 Critical Findings (Must Fix)
 *Vulnerabilities, data corruption/loss, crashes, contract breakage, or missing requirement implementations.*
 - **Location:** `[file_path#Llines]`
-- **Category:** (Security | Invariant Broken | Concurrency | Contract Breakage | Requirement Gap)
+- **Category:** (Security | Invariant Broken | Concurrency | Contract Breakage | Requirement Gap | Breaking Spec Drift)
 - **Problem & Impact:** Detailed technical explanation of the failure mode.
 - **Actionable Fix:**
   ````diff
@@ -169,7 +175,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 #### 🟡 Major Improvements (Should Fix)
 *Performance bottlenecks, potential race conditions, missing edge guards, architectural coupling.*
 - **Location:** `[file_path#Llines]`
-- **Category:** (Performance | Resource Leak | Error Handling | Architecture)
+- **Category:** (Performance | Resource Leak | Error Handling | Architecture | Documentation Drift / Stale Spec)
 - **Problem & Impact:** Technical explanation.
 - **Actionable Fix:** Concrete ````diff```` block.
 

@@ -19,6 +19,9 @@ flowchart TD
     SolutionSynthesis --> SkillDiscovery["🧰 Skill Gap Assessment\n(Curated Repos & Local Skills)"]
     SkillDiscovery --> Specs["📑 Specs: 00_overview.md + 01_phase.md..."]
     Specs --> Implement["⚡ /implement (Fast-Track Phases)"]
+
+    Query["❓ Architecture Question / Data-Flow / Exploration"] --> Explain["🔬 /explain (Read-Only Tracing)"]
+    Explain --> TraceOutput["📊 Sequence / Flowchart + State Mapping (Chat / .local/)"]
     
     subgraph ExecutionGroup ["🚀 Цикл виконання та проміжного аудиту"]
         Implement --> Tactical["🛠️ Phase I: Tactical Verification\n(Build, Targeted Tests, Visuals, Regression)"]
@@ -59,9 +62,10 @@ flowchart TD
 ```
 ├── GEMINI.md                   # Глобальні правила, межі безпеки та протокол комунікації
 └── config/
-    ├── global_workflows/       # 7 основних воркфловів (Slash Commands)
+    ├── global_workflows/       # 8 основних воркфловів (Slash Commands)
     │   ├── context.md          # /context — ініціалізація та оновлення контексту репозиторія
     │   ├── investigate.md      # /investigate — аналіз, архітектура та декомпозиція
+    │   ├── explain.md          # /explain — наскрізний трейсинг потоків даних та архітектури
     │   ├── implement.md        # /implement — тактична розробка та стратегічний аудит
     │   ├── debug.md            # /debug — детермінований RCA та виправлення багів
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
@@ -104,7 +108,7 @@ flowchart TD
 - Глибокий аналіз задач, архітектури (HLD/ADR/PDF) без модифікації робочого коду (**Read-Only**).
 - **Mandatory Trade-off Synthesis:** обов'язковий порівняльний аналіз 2–3 підходів (Minimalist vs Enterprise vs Alternative) з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), Blast Radius та вибором або гібридним синтезом.
 - Автоматичний підбір потрібних скілів під стек проєкту та планування проміжних QA-гейтів.
-- Генерує майстер-план `.local/tasks/**/00_overview.md` (із секцією `Architecture Decisions & Trade-off Synthesis`) та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]`.
+- Генерує майстер-план `.local/tasks/**/00_overview.md` (із секцією `Architecture Decisions & Trade-off Synthesis`) та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]` (з повною регресією, аудитом/оновленням документації та `/review`).
 
 ### 3. `/implement` (Автономна розробка та перевірка)
 **Файл:** `config/global_workflows/implement.md`
@@ -119,18 +123,24 @@ flowchart TD
 ### 5. `/review` (Аудит коду та статична верифікація)
 **Файл:** `config/global_workflows/review.md`
 - Строге **read-only** рев'ю за протоколом *Static Flow Verification & Bidirectional Reconciliation*.
-- Двостороння перевірка diff (100% покриття вимог і 0% незапитаного коду), OWASP-безпека, Blast Radius аудит.
+- Двостороння перевірка diff (100% покриття вимог і 0% незапитаного коду), OWASP-безпека, Blast Radius аудит та перевірка синхронізації/актуальності документації (`README.md`, API спеки, ADR, конфіги).
 - Працює для незакоміченого коду (`git diff HEAD`), гілок/PR (`git diff main...feature`) та історії комітів.
 
 ### 6. `/describe` (Генерація опису Pull Request)
 **Файл:** `config/global_workflows/describe.md`
 - Автоматично створює короткий, структурований опис PR у файл `.local/pr_description.md`.
-- Conventional Commit Title, мотивація змін, покомпонентний список правок (Domain, API, DB, Config) та Breaking Changes.
+- Conventional Commit Title, мотивація змін, покомпонентний список правок (Domain, API, DB, Config, Docs) та Breaking Changes.
 
 ### 7. `/checkpoint` (Збереження та відновлення контексту)
 **Файл:** `config/global_workflows/checkpoint.md`
 - Інтерактивно дистилює важливі знання сесії (багатозадачні напрямки, архітектурні рішення, стан коду, беклог) у `.local/checkpoint.md`.
 - Дозволяє за допомогою команди `/checkpoint load` миттєво відновити повний робочий контекст у новій сесії з чистою пам'яттю (0% галюцинацій).
+
+### 8. `/explain` (Трейсинг архітектури та потоків даних)
+**Файл:** `config/global_workflows/explain.md`
+- Глибоке дослідження підсистем, життєвого циклу запитів та руху даних без оверхеду планування (**Read-Only**).
+- Наскрізний аналіз: *Entry Point (API/CLI/Webhook) $\rightarrow$ Domain/Service $\rightarrow$ Storage/DB/Cache $\rightarrow$ Edge Hazards*.
+- Обов'язкова візуалізація за допомогою Mermaid (`sequenceDiagram` / `flowchart`), мапінг таблиць БД/Redis-ключів та пряма відповідь у чат (або збереження у `.local/explorations/` за прапорцем `--save`).
 
 ---
 
@@ -141,7 +151,7 @@ flowchart TD
 | Категорія | Включені скіли | Призначення |
 | :--- | :--- | :--- |
 | **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming`, `domain-modeling`, `grill-me` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API, схем БД, доменне моделювання та стрес-тестування рішень |
-| **🤖 AI & Агенти** | `ai-agents-architect`, `rag-engineer`, `prompt-engineering` | Розробка автономних агентів, RAG-систем, оптимізація промптів та пам'яті |
+| **🤖 AI & Агенти** | `ai-agents-architect`, `rag-engineer`, `prompt-engineering` | Розробка автономних агентів, Hybrid RAG & GraphRAG (Knowledge Graphs), оптимізація промптів та пам'яті |
 | **💻 Мови & Фреймворки** | `csharp-pro`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
 | **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |

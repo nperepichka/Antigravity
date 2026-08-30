@@ -24,7 +24,7 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 ---
 
 ### Step 2: Architecture Discovery & Skill Assessment
-1. **Brownfield Discovery:** Trace symbols/flows via `grep_search` and range-limited `view_file` (`DB -> Domain -> API -> UI`). Assess schema impact, breaking risks, and existing test suites/coverage. **Cite only verified paths and signatures in specs — never speculate about file contents or API shapes without inspection (Rule I).**
+1. **Brownfield Discovery:** Trace symbols/flows via `grep_search` and range-limited `view_file` (`DB -> Domain -> API -> UI`). Assess schema impact, breaking risks, and existing test suites/coverage. Assess existing project documentation (`README.md`, architecture docs/ADRs, API specs, setup/runbooks) to plan documentation audit & synchronization in the final QA phase. **Cite only verified paths and signatures in specs — never speculate about file contents or API shapes without inspection (Rule I).**
 2. **Greenfield / HLA Discovery:** Synthesize runtimes, DBs, message queues, auth providers (Entra ID, Auth0, Cognito), 3rd-party APIs (Stripe, Twilio, SendGrid), and cloud topology (Azure, AWS, GCP).
 3. **Skill Gap Discovery & Security Guard:**
    - Check active workspace (`.agents/skills/`) and global (`~/.gemini/config/skills/`) skills.
@@ -75,12 +75,13 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 1. **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
 2. **`[MANUAL/DEVOPS]` (Cloud/Infra):** Cloud provisioning, portal config, OAuth/IdP app registration, DNS/SSL, secret vaults (Key Vault, Secrets Manager), webhooks.
 3. **`[DATA]` (Data Migrations):** Idempotent transformations/backfills (`IF NOT EXISTS`, transactional) with rollback scripts and validation queries.
-4. **`[QA]` (E2E Verification, Clean-Context Subagents & `/review`):**
+4. **`[QA]` (E2E Verification, Documentation Sync, Clean-Context Subagents & `/review`):**
    - Integration/E2E test suites, performance benchmarks, and security checks.
+   - **Documentation Audit & Sync Gate:** In the final `[QA]` phase, explicitly plan verification and updating of existing project documentation (`README.md`, architecture docs, ADRs, API specs/OpenAPI schemas, deployment/setup guides, `.env.example` references) whenever documentation exists and is affected by the changes across implemented phases.
    - **Clean Context & Subagent Gate:** Execute QA and code review with an isolated, fresh context (delegating to a clean subagent or running in a clean session) to eliminate implementation anchoring bias and self-verification blind spots.
    - **Multi-Phase & Cumulative Scope:** Milestone QA and Final QA may audit uncommitted or staged (`git diff --staged` / `git diff HEAD`) code accumulated across multiple preceding sub-phases (`01..03`) or against the base branch (`git diff <base>`), reconciling all covered phase specifications simultaneously.
    - **Mandatory `/review` Integration:** Audit feature diff with `/review`. Triage `🔴 Must Fix` / `🟡 Should Fix` with surgical patches until `🟢 APPROVED`.
-   - **Milestone & Final QA:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases. **CRITICAL:** The entire master plan MUST always conclude with a final `[QA]` phase. Never skip the final review.
+   - **Milestone & Final QA:** For large plans, insert a dedicated `[QA]` phase after each cohesive group of phases. **CRITICAL:** The entire master plan MUST always conclude with a final `[QA]` phase incorporating full regression, documentation audit/updates, and code review. Never skip the final review.
 5. **Recursive Decomposition (Sub-phases):** If the user asks to investigate a specific large phase (e.g., `/investigate phase 2`), decompose it into atomic, highly granular sub-phases (e.g., `02a_<name>.md`, `02b_<name>.md`). Each sub-phase must be small enough to be implemented flawlessly by `/implement` (acting as actionable "tracer-bullet" tickets).
 6. **Multi-Session Scaling (Frontier vs Fog of War):** For massive chunks of work that span multiple agent sessions, use `00_overview.md` as the shared map:
    - **The Frontier:** The immediate, actionable sub-phases whose prerequisites are settled. Generate full phase markdown files for these.
@@ -98,10 +99,13 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
   - Layer-by-layer architectural decision mapping (Data/Concurrency, Domain Logic, Resiliency, API Contracts).
   - Detailed rationale for the synthesized target architecture and why specific trade-offs were chosen or rejected.
 - **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
-- **Execution Matrix (DAG & Shared Map):** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`). For massive projects, demarcate the "Frontier" (live phase files) from the "Fog of War" (unspecified future phases).
+- **Execution Matrix (DAG & Shared Map):**
+  - **Visual Dependency Graph:** Mandatory Mermaid diagram (`graph TD` or `flowchart TD`) showing phase nodes and directed dependency edges (clearly identifying parallel tracks vs. blocking bottlenecks).
+  - **Execution Table:** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`). For massive projects, demarcate the "Frontier" (live phase files) from the "Fog of War" (unspecified future phases).
 - **Out of Scope:** Explicitly list work ruled out of this effort to bound the fog of war.
 - **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
 - **Shared Data Contracts:** DTO schemas, interfaces, event payloads.
+- **Documentation Impact Matrix:** Explicit checklist of project documentation (`README.md`, OpenAPI/API specs, ADRs, configuration templates, runbooks) targeted for synchronization during the final QA phase.
 
 #### 5.2 Phase Files (`01_<name>.md`, `02_<name>.md`, ...)
 Use the corresponding structured template (all in **English**):
@@ -109,7 +113,7 @@ Use the corresponding structured template (all in **English**):
 - **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
 - **Template B `[MANUAL/DEVOPS]`:** Objective & Overview -> Step-by-Step Portal Navigation Guide -> Alternative CLI/IaC Commands -> Secrets & Output Variables Checklist -> Verification & Connectivity Test.
 - **Template C `[DATA]`:** Objective & Scope -> Prerequisites -> Idempotent Migration Script (with rollback & transactions) -> Validation Queries -> Definition of Done.
-- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff --staged` / `git diff HEAD` / `git diff <base>`) -> Test Environment Setup -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
+- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff --staged` / `git diff HEAD` / `git diff <base>`) -> Test Environment Setup -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Documentation Audit & Sync (verify & update `README.md`, ADRs, API schemas, guides if applicable) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
 
 ---
 

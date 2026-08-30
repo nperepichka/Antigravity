@@ -1,6 +1,6 @@
 ---
 name: rag-engineer
-description: Master production Retrieval-Augmented Generation (RAG) systems. Covers semantic/hierarchical chunking, hybrid search (BM25 + vector embeddings), Reciprocal Rank Fusion, Cross-Encoder rerankers, context compression, and RAG evaluation metrics (RAGAS). Use when building knowledge retrieval pipelines, search engines, or document Q&A systems.
+description: Master production Retrieval-Augmented Generation (RAG) and GraphRAG systems. Covers semantic chunking, hybrid search (BM25 + vector embeddings), Reciprocal Rank Fusion, Cross-Encoder rerankers, Knowledge Graph extraction, hierarchical community summarization, and RAG evaluation metrics (RAGAS). Use when building knowledge retrieval pipelines, search engines, or document Q&A systems.
 ---
 
 # Retrieval-Augmented Generation (RAG) Architecture
@@ -113,7 +113,63 @@ def reciprocal_rank_fusion(
 
 ---
 
-## 3. Two-Stage Retrieval Pipeline Architecture
+## 3. GraphRAG & Knowledge Graph Architecture
+
+Combines structured graph topology with unstructured vector embeddings to answer global, multi-hop, and relationship-dense queries where standard vector search fails.
+
+```mermaid
+flowchart TD
+    Doc["Raw Documents"] --> Chunks["Text Chunks"]
+    Chunks --> EntityExtractor["LLM Entity & Relationship Extractor"]
+    EntityExtractor --> KG["Knowledge Graph (Nodes: Entities, Edges: Relations)"]
+    KG --> Communities["Hierarchical Community Detection (Leiden Algorithm)"]
+    Communities --> Summaries["Community Summaries (Global Synthesis)"]
+    
+    UserQuery["User Query"] --> Router{"Query Scope Analyzer"}
+    Router -->|Local / Entity Specific| LocalGraph["Entity Neighborhood + Hybrid Vector Search"]
+    Router -->|Global / Multi-Hop Aggregation| GlobalSummaries["Map-Reduce over Community Summaries"]
+    LocalGraph & GlobalSummaries --> Synthesis["LLM Final Grounded Synthesis"]
+```
+
+### 3.1 Entity-Relation Triplet Extraction with Pydantic
+
+```python
+from typing import List, Literal
+from pydantic import BaseModel, Field
+
+class GraphEntity(BaseModel):
+    """Extracted semantic entity."""
+    name: str = Field(description="Normalized entity identifier (e.g., AuthService, Stripe, OrderAggregate)")
+    type: Literal["SERVICE", "DATABASE", "DOMAIN_MODEL", "API_ENDPOINT", "PERSON", "ORGANIZATION", "CONCEPT"]
+    description: str = Field(description="Comprehensive summary of the entity's responsibility and context in text")
+
+class GraphRelationship(BaseModel):
+    """Directed semantic relationship between entities."""
+    source_entity: str = Field(description="Name of the source entity")
+    target_entity: str = Field(description="Name of the target entity")
+    relation_type: str = Field(description="Relationship predicate: CALLS | DEPENDS_ON | STORES | MUTATES | AUTHENTICATES")
+    description: str = Field(description="Explanation of how the entities interact")
+    weight: float = Field(default=1.0, ge=0.0, le=1.0, description="Confidence or frequency score")
+
+class KnowledgeGraphPayload(BaseModel):
+    """Complete graph extraction result per chunk."""
+    entities: List[GraphEntity] = Field(default_factory=list)
+    relationships: List[GraphRelationship] = Field(default_factory=list)
+```
+
+### 3.2 Hybrid Vector + Graph Query Routing Strategy
+
+1. **Local Search (Entity Neighborhood):**
+   - Extract mentioned entities from `UserQuery`.
+   - Traverse 1-to-2 hop neighbors in the Knowledge Graph (`MATCH (e:Entity {name: $name})-[r]->(neighbor) RETURN e, r, neighbor`).
+   - Fuse with top-$K$ semantic vector chunks.
+2. **Global Search (Community Summaries):**
+   - For broad thematic questions (*"What are the main architectural risks across all services?"*), retrieve pre-computed hierarchical **Community Summaries** (generated via Leiden community detection).
+   - Execute parallel map-reduce synthesis over community summaries to avoid context window overflow.
+
+---
+
+## 4. Two-Stage Retrieval Pipeline Architecture
 
 ```mermaid
 flowchart TD
@@ -133,7 +189,7 @@ flowchart TD
 
 ---
 
-## 4. RAG Quality Evaluation Metrics (RAGAS Framework)
+## 5. RAG Quality Evaluation Metrics (RAGAS Framework)
 
 1. **Context Precision:** Percentage of retrieved chunks that are truly relevant to the query.
 2. **Context Recall:** Whether all information required to answer the query was successfully retrieved.
@@ -142,7 +198,7 @@ flowchart TD
 
 ---
 
-## 5. ⚠️ Production Sharp Edges & Solutions
+## 6. ⚠️ Production Sharp Edges & Solutions
 
 | Failure Mode | Severity | Root Cause | Engineering Solution |
 | :--- | :--- | :--- | :--- |
@@ -151,3 +207,5 @@ flowchart TD
 | **Lost In The Middle** | 🟡 High | LLM ignores relevant chunks placed in the middle of prompt | Place highest-scored chunks at the very beginning and very end of context window. |
 | **Outdated Embeddings** | 🟡 High | Source documents updated without invalidating vector index | Implement event-driven CDC (Change Data Capture) or hash-based chunk re-indexing. |
 | **Hallucination on Empty Retrieval** | 🔴 Critical | LLM generates answers when context has low similarity | Set a strict similarity threshold; instruct model: *"If information is missing, respond 'Insufficient context'."* |
+| **Entity Resolution / Duplication** | 🟡 High | Extracted entities with slight variations (`StripeAPI` vs `Stripe`) create fragmented graph nodes | Apply entity normalization rules and cosine similarity clustering over entity embeddings before graph insertion. |
+| **Knowledge Graph Schema Drift** | 🟡 High | LLM generates inconsistent relation predicates (`calls` vs `CALLS` vs `invokes`) | Enforce strict Pydantic `Literal` enums on `relation_type` and validate against an ontology schema. |
