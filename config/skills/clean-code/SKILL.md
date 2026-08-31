@@ -1,6 +1,6 @@
 ---
 name: clean-code
-description: Applies principles from Robert C. Martin's 'Clean Code', SOLID architecture, and systematic code refactoring patterns. Use when writing new features, reviewing pull requests, refactoring legacy code, or eliminating code smells.
+description: Applies principles from Robert C. Martin's 'Clean Code', SOLID architecture, cyclomatic complexity reduction, and systematic code refactoring patterns. Use when writing new features, reviewing pull requests, refactoring legacy code, or eliminating code smells and deeply nested branching.
 user-invocable: true
 risk: safe
 source: "ClawForge (https://github.com/jackjin1997/ClawForge)"
@@ -36,7 +36,20 @@ This skill embodies the principles of "Clean Code" by Robert C. Martin (Uncle Bo
 
 ---
 
-## 3. Comments & Self-Documenting Code
+## 3. Cyclomatic Complexity & Branching Control
+- **Thresholds:** 1–5 (clean), 6–10 (watch), 11–15 (refactor now), 15+ (mandatory split).
+- **Refactoring Tactics (Order of Preference):**
+  1. *Guard Clauses:* Invert conditions and return early to flatten nested code.
+  2. *Extract Function:* Break into intention-revealing functions named for *what* they do, not *how*.
+  3. *Lookup Table / Map:* Replace `switch` or `if/else` ladders with dictionary/map dispatch.
+  4. *Named Predicates:* Extract multi-clause conditionals into well-named boolean functions (`if (is_eligible)` vs boolean soup).
+  5. *Flatten Loops:* Use early `continue` and extracted loop bodies instead of nested conditional blocks.
+  6. *Polymorphism / Strategy:* Replace repeated switch-on-type patterns (when occurring in 2+ places).
+- **Anti-Gaming Rule:** Never compress branches into dense one-liners or nested ternaries to game metrics. Complexity must move into well-named units, never hidden behind cleverness.
+
+---
+
+## 4. Comments & Self-Documenting Code
 - **Don't Comment Bad Code—Rewrite It**: Most comments are apologies for failure to express intent in code.
 - **Explain Yourself in Code**: 
   ```python
@@ -51,7 +64,7 @@ This skill embodies the principles of "Clean Code" by Robert C. Martin (Uncle Bo
 
 ---
 
-## 4. SOLID Principles in Practice
+## 5. SOLID Principles in Practice
 
 1. **Single Responsibility Principle (SRP):** A class should have one, and only one, reason to change.
 2. **Open/Closed Principle (OCP):** Software entities should be open for extension, but closed for modification (Strategy / Factory patterns).
@@ -61,14 +74,14 @@ This skill embodies the principles of "Clean Code" by Robert C. Martin (Uncle Bo
 
 ---
 
-## 5. Objects, Data Structures & Error Handling
+## 6. Objects, Data Structures & Error Handling
 - **The Law of Demeter**: A module should not know about the innards of the objects it manipulates (`a.getB().getC().doSomething()` is a violation).
 - **Use Exceptions instead of Return Codes**: Keeps the happy path uncluttered.
 - **Don't Return or Pass Null**: Use Null Object pattern, `Optional<T>`, `Result<T>`, or non-nullable types.
 
 ---
 
-## 6. Unit Tests & TDD
+## 7. Unit Tests & TDD
 - **The Three Laws of TDD**:
   1. Don't write production code until you have a failing unit test.
   2. Don't write more of a unit test than is sufficient to fail.
@@ -90,8 +103,9 @@ For comprehensive, multi-language code samples (Python, TypeScript, Java, Go) il
 ---
 
 ## 🛠️ Implementation Checklist
-- [ ] Is this function smaller than 20 lines?
+- [ ] Is this function smaller than 20 lines with low cyclomatic complexity (CC ≤ 10)?
 - [ ] Does this function do exactly one thing?
+- [ ] Are nested branches flattened with guard clauses or early returns?
 - [ ] Are all names searchable and intention-revealing?
 - [ ] Have I avoided comments by making the code clearer?
 - [ ] Have I replaced magic numbers with descriptive constants?
