@@ -66,6 +66,10 @@
 - **Verify Before Assuming:** For dependency versions, framework configs, deprecated APIs, or unfamiliar error messages — use `search_web` / `read_url_content` to verify against current documentation rather than relying on training data.
 - **Intent Preservation:** Treat user follow-up clarifications as amendments to the active task, not replacement objectives.
 
+### Rule J: Solution Integrity & Anti-Masking
+- **Root Cause First (Zero Symptom-Masking):** Never add conditional branches (`if/else`, `switch/case`, special-case handlers) to work around a bug or fulfill a requirement when the real fix is correcting the underlying logic, data flow, or contract.
+- **Revert Over Stack:** If an approach is fundamentally wrong (wrong abstraction, layer, or assumption), self-revert and re-approach cleanly. Never stack corrective patches on a broken foundation.
+
 ---
 
 ## 4. Token Economics & Boundary Exclusions
