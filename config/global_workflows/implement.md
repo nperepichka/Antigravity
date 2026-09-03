@@ -32,7 +32,7 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
 ---
 
 ### Step 2: Phase I — Tactical Development Loop
-Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verification)**. Strict **Scope Guard:** Never touch files listed under `Out of Scope`.
+Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verification)**, **Rule J (Solution Integrity & Anti-Masking)**. Strict **Scope Guard:** Never touch files listed under `Out of Scope`.
 
 > **Ground-Truth Gate (Rule I):** Before writing code that depends on existing signatures, types, or patterns, verify the actual current state of target files — never code against assumptions from memory or stale context. If actual state diverges from the spec or plan, adapt the implementation approach to match reality and note the deviation in the walkthrough.
 
@@ -70,9 +70,9 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
    - *Security & Performance:* No leaks, concurrency hazards, unclosed handles, or bottlenecks.
 3. **Clean Context Review Gate (Subagents & `/review`):**
    - Self-audit is necessary for immediate bug catching, but prone to anchoring bias. For thorough security, contract, and multi-phase audits, delegate review to an isolated clean subagent or trigger a decoupled `/review` session passing only the task specs and staged diff.
-4. **Revert vs. Patch:**
+4. **Revert vs. Patch (Rule J):**
    - *Minor issues:* Apply targeted patches and re-verify in Step 2.
-   - *Fundamental architectural flaws / Dead-ends:* Perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`, preserving unrelated changes) and re-implement cleanly. Never stack hacks on a broken foundation.
+   - *Fundamental architectural flaws / Dead-ends:* Perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`, preserving unrelated changes) and re-implement cleanly. Never stack hacks on a broken foundation (**Rule J: Revert Over Stack**).
 
 ---
 

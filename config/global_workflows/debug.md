@@ -10,6 +10,7 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 
 ## Core Directives
 - **Red-Before-Green Rule:** NEVER patch code based on guesswork. Write/identify a deterministic failing test or reproduction script FIRST before modifying production logic.
+- **Solution Integrity & Anti-Masking (Rule J):** Fix the root cause in the underlying data flow, state, or contract. NEVER add symptom-masking conditional branches (`if/else`, `switch/case`) or ad-hoc special cases to bypass a bug. Revert over stack — self-revert fundamentally flawed attempts rather than stacking band-aids.
 - **Surgical Fix:** Fix only root cause per **Rule D**. No unsolicited refactoring or cosmetic sweeps.
 - **Safety Boundaries:** Adhere to **Rule C** (no unauthorized package installs or destructive commands).
 
@@ -52,9 +53,9 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 ---
 
 ### Step 4: Surgical Fix & Verification (Green Phase)
-1. **Minimal Patch:** Apply the minimal robust fix directly resolving the root cause. Avoid symptom-masking workarounds.
+1. **Minimal Patch (Rule J):** Apply the minimal robust fix directly resolving the root cause per **Rule D** and **Rule J**. Strictly avoid symptom-masking workarounds or special-case conditionals.
 2. **Fast Inner Loop:** Re-run reproduction test until **100% green**.
-3. **Hypothesis Reversion Gate:** If an attempted fix fails or introduces regressions, perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`) before testing alternative hypotheses. Never accumulate broken edits.
+3. **Hypothesis Reversion Gate (Rule J):** If an attempted fix fails or introduces regressions, perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`) before testing alternative hypotheses. Never accumulate broken edits (**Revert Over Stack**).
 4. **Full Regression Gate:** Run full project build, typecheck, lint, and test suite. Resolve any breakages until the entire suite is green.
 
 ---

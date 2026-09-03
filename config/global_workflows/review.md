@@ -104,9 +104,10 @@ Evaluate the diff against the complete multi-dimensional audit dimensions:
 - **Cancellation & Async:** Proper propagation of `CancellationToken` / context deadlines, avoiding blocking async calls (`.Result`, `.Wait()`, synchronous sleep inside async methods).
 
 #### 3.6 Architecture, SOLID & Code Quality
-- **Surgical Scope:** Focused changes without accidental touches.
+- **Surgical Scope:** Focused changes without accidental touches (**Rule D**).
+- **Solution Integrity & Anti-Masking (Rule J):** Ensure zero symptom-masking conditional branches (`if/else`, `switch/case`, special-case flags) added to hide bugs. Changes must correct the root cause in the underlying data flow, domain model, or contract. Verify no stacked patches on a broken foundation.
 - **Coupling & Cohesion:** Clear separation of concerns (domain logic decoupled from presentation and persistence layers).
-- **Error Handling:** No swallowed exceptions (`catch (Exception) {}`), proper null guards, accurate HTTP status codes and error models.
+- **Error Handling:** No swallowed exceptions (`catch (Exception) {}`), proper null guards, explicit domain results (`Result<T, E>`), accurate HTTP status codes and error models.
 - **Type Strictness:** No loose types (`any`, `object`), unhandled nullable references, or unsafe type casts.
 
 #### 3.7 Backward Compatibility & Schema Integrity
@@ -153,6 +154,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 
 ### 3. Static Verification Checklist
 - [x] **Scope Integrity:** 0 unrequested changes or side-effect edits in diff.
+- [x] **Solution Integrity (Rule J):** 0 symptom-masking conditional branches or stacked band-aids hiding root-cause flaws.
 - [x] **Blast Radius:** All upstream/downstream callers statically checked for regressions.
 - [x] **Contract & Type Safety:** Downstream signatures and contracts preserved without breaks.
 - [x] **Documentation Sync:** Project docs (README, API specs, ADRs, config templates) verified and synchronized with code changes.
