@@ -41,9 +41,11 @@ flowchart TD
     GreenFix --> Walkthrough
     GreenFix --> Describe
 
-    UserFeedback["💡 User Correction / Anti-Pattern Flag"] --> RuleG["🔄 Rule G: Self-Improvement Protocol\n(Proactive Proposal -> GEMINI.md / Workflows / /learn)"]
-    RuleG -.-> Investigate
-    RuleG -.-> Implement
+    SessionFriction["⚠️ User Feedback / Friction / Incident"] --> Retro["🔄 /retro (Ретроспективний аудит)"]
+    Retro --> RetroReport["📑 .local/retro.md (Аналіз + Промпт)"]
+    RetroReport -.-> Optimize["🔄 Optimization Protocol\n(Applied to GEMINI.md / Workflows via /learn)"]
+    Optimize -.-> Investigate
+    Optimize -.-> Implement
 
     ContextBloat["🧠 Довга сесія / Переповнений контекст"] --> CheckpointSave["🧹 /checkpoint (Дистиляція стану)"]
     CheckpointSave --> CheckpointFile["📑 .local/checkpoint.md"]
@@ -62,7 +64,7 @@ flowchart TD
 ```
 ├── GEMINI.md                   # Глобальні правила, межі безпеки та протокол комунікації
 └── config/
-    ├── global_workflows/       # 8 основних воркфловів (Slash Commands)
+    ├── global_workflows/       # 9 основних воркфловів (Slash Commands)
     │   ├── context.md          # /context — ініціалізація та оновлення контексту репозиторія
     │   ├── investigate.md      # /investigate — аналіз, архітектура та декомпозиція
     │   ├── explain.md          # /explain — наскрізний трейсинг потоків даних та архітектури
@@ -70,7 +72,8 @@ flowchart TD
     │   ├── debug.md            # /debug — детермінований RCA та виправлення багів
     │   ├── review.md           # /review — аудит diff, безпека та статична верифікація
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
-    │   └── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
+    │   ├── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
+    │   └── retro.md            # /retro — ретроспективний аудит сесії та промпт на оптимізацію
     ├── templates/              # Шаблони конфігурацій (hooks.json.example тощо)
     └── skills/                 # 31 спеціалізований інженерний скіл (Domain Capabilities)
 ```
@@ -95,10 +98,10 @@ flowchart TD
 - **Safety Boundaries (Rule C):** Захист від несанкціонованого встановлення пакетів, деструктивних Git-команд, операцій з БД та контейнерами.
 - **Surgical Edits (Rule D):** Точкові правки (Minimal Diff) без небажаного масового реформатування коду, збереження відкритих контрактів та guardrails.
 - **Verification Protocol (Rule F):** Обов'язкова перевірка збірки, тестів, лінтерів та проактивне написання unit-тестів на нові публічні інтерфейси.
-- **Continuous Self-Improvement (Rule G):** Проактивна фіксація зауважень щодо помилок та формулювання правил для запобігання рецидивам (через `GEMINI.md`, воркфлови або `/learn`).
+- **Mistake Rectification (Rule G):** Миттєве хірургічне виправлення помилок за вказівкою користувача без оборонних виправдань, раціоналізацій чи вибачень.
+- **Token Economics (Rule H):** Суворе ігнорування білд-артефактів, кеш-директорій (`.next`, `.nuxt`, `.pytest_cache`, `.turbo`), блокування перегляду повних lock-файлів та JIT-завантаження скілів (макс 1–3).
 - **Hallucination Prevention & Intent Fidelity (Rule I):** Заборона кодування на здогадках; твердження базуються виключно на фактично прочитаних файлах і верифікованих специфікаціях.
 - **Solution Integrity & Anti-Masking (Rule J):** Усунення першопричини в моделі/контракті даних замість симптоматичних `if/else`-милиць; "Revert Over Stack" — відкат невдалої абстракції замість нашарування латок.
-- **Token Economics (Rule H):** Суворе ігнорування білд-артефактів, кеш-директорій (`.next`, `.nuxt`, `.pytest_cache`, `.turbo`), блокування перегляду повних lock-файлів та JIT-завантаження скілів (макс 1–3).
 
 ---
 
@@ -148,6 +151,13 @@ flowchart TD
 - Глибоке дослідження підсистем, життєвого циклу запитів та руху даних без оверхеду планування (**Read-Only**).
 - Наскрізний аналіз: *Entry Point (API/CLI/Webhook) $\rightarrow$ Domain/Service $\rightarrow$ Storage/DB/Cache $\rightarrow$ Edge Hazards*.
 - Обов'язкова візуалізація за допомогою Mermaid (`sequenceDiagram` / `flowchart`), мапінг таблиць БД/Redis-ключів та пряма відповідь у чат (або збереження у `.local/explorations/` за прапорцем `--save`).
+
+### 9. `/retro` (Ретроспективний аудит сесії та промпт на оптимізацію)
+**Файл:** `config/global_workflows/retro.md`
+- Автоматизований ретроспективний аудит активної сесії діалогу та дій агента (**Read-Only**).
+- **Dual-Tier Forensic Scan:** миттєвий аналіз активного контексту з автоматичним фолбеком до `transcript.jsonl` для глибоких (>10 turns) або ущільнених сесій.
+- **Root-Cause Taxonomy & Minimal Intervention:** категоризація інцидентів за 5 типами (`MISSING_RULE`, `AMBIGUOUS_RULE`, `CONFLICTING_RULES`, `SKILL_DEFICIT`, `AGENT_DEVIATION`) із захистом від роздування правил при випадкових помилках моделі.
+- Формує структурований звіт та автономний промпт у `.local/retro.md` для надійного замкненого контуру оптимізації правил та воркфловів.
 
 ---
 
