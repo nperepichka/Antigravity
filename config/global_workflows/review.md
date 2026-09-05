@@ -42,8 +42,8 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
 #### 1.2 Target Resolution & Multi-State Diff Extraction
 1. **Target State Identification (Staged, Uncommitted, or Committed):**
    - *Working Tree Status Check:* Run `git status -s` to assess tracked, staged, and unstaged modifications.
-   - *Staged Changes (Common for verified phases):* `git diff --staged` (or `git diff --cached`) when completed sub-phases have been staged.
-   - *Working Tree + Staged (Uncommitted multi-task pool):* `git diff HEAD` (captures all uncommitted and staged modifications across multiple phases).
+   - *Working Tree Changes (Default for uncommitted tasks):* `git diff HEAD` (captures all uncommitted modifications in the working tree across active phases).
+   - *Staged Changes (When staged manually by user):* `git diff --staged` (or `git diff --cached`) if the user has manually staged verified files.
    - *Cumulative Branch Diff (Full feature vs Base):* `git diff <base_branch>` (e.g., `git diff main` or `git diff develop`) capturing all committed + staged + working tree changes.
    - *Branch Comparison:* `git diff <base>...<target>` (e.g., `git diff main...feature`).
    - *Commit Range:* `git diff HEAD~N..HEAD` or `git diff <base_commit>..<target_commit>`.

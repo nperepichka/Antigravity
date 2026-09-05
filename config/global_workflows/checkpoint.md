@@ -30,7 +30,7 @@ The workflow operates in two distinct modes based on the input argument:
 
 #### Step 1: Session Analysis & State Ingestion
 1. **Transcript & Context Scan:** Parse conversation history (`transcript.jsonl`) to identify all topics discussed, problems analyzed, and solutions evaluated.
-2. **Workspace Delta:** Run `git status` and `git diff --name-status` to identify modified, newly created, or uncommitted files across the workspace.
+2. **Workspace Delta:** Run `git status -s` and `git diff --name-status HEAD` to identify modified, newly created, or uncommitted files (staged or unstaged) across the workspace.
 
 #### Step 2: Multi-Track Synthesis
 Decompose the session findings into four structured dimensions (supports multiple parallel tasks):

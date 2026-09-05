@@ -69,7 +69,7 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
    - *SOLID & Cleanliness:* Production-ready, maintainable, no hacky workarounds.
    - *Security & Performance:* No leaks, concurrency hazards, unclosed handles, or bottlenecks.
 3. **Clean Context Review Gate (Subagents & `/review`):**
-   - Self-audit is necessary for immediate bug catching, but prone to anchoring bias. For thorough security, contract, and multi-phase audits, delegate review to an isolated clean subagent or trigger a decoupled `/review` session passing only the task specs and staged diff.
+   - Self-audit is necessary for immediate bug catching, but prone to anchoring bias. For thorough security, contract, and multi-phase audits, delegate review to an isolated clean subagent or trigger a decoupled `/review` session passing only the task specs and uncommitted diff (`git diff HEAD` — capturing unstaged or manually staged changes).
 4. **Revert vs. Patch (Rule J):**
    - *Minor issues:* Apply targeted patches and re-verify in Step 2.
    - *Fundamental architectural flaws / Dead-ends:* Perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`, preserving unrelated changes) and re-implement cleanly. Never stack hacks on a broken foundation (**Rule J: Revert Over Stack**).
@@ -77,14 +77,15 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 ---
 
 ### Step 4: Delivery & Artifacts
-1. **Intermediate Staging Handshake (Multi-Phase Hygiene):**
-   - After Phase I & II verification passes for a given phase/sub-phase, stage all verified modified and new files (`git add <files>`).
-   - Staging keeps cumulative progress clean, distinct from scratch files, and immediately ready for multi-phase diff extraction (`git diff --staged`) during subsequent Milestone/Final `[QA]` reviews.
+1. **Unstaged Working Tree Delivery (User Review Gate):**
+   - After Phase I & II verification passes for a given phase/sub-phase, keep all verified modified and new files unstaged in the working tree.
+   - NEVER run `git add` automatically. All staging and committing are strictly user-driven — always leave verified changes unstaged in the working tree for user inspection.
+   - Unstaged working tree modifications remain cleanly trackable via `git status -s` and diff extraction (`git diff HEAD`, or `git diff --staged` if staged manually by the user) during subsequent Milestone/Final `[QA]` reviews.
 2. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
 3. **Phase / Sub-Phase Tracking & Handoff:**
    - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
      - **Automated Next Phase (`[CODE]`, `[DATA]`):** Provide clickable link and ready `/implement <next-phase>` command.
-     - **Next Phase `[QA]` (Milestone / Final Review):** Clearly state the cumulative list of covered phases (e.g., `01`, `02`) and provide ready `/review` command targeting `git diff --staged` or `git diff HEAD` under clean context.
+     - **Next Phase `[QA]` (Milestone / Final Review):** Clearly state the cumulative list of covered phases (e.g., `01`, `02`) and provide ready `/review` command targeting `git diff HEAD` (or `git diff --staged` if manually staged) under clean context.
      - **Manual Next Phase (`[MANUAL/DEVOPS]`):** Present portal navigation guide, cloud checklist, and output variables, then prompt user to complete manual steps before proceeding to dependent code phases.
    - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
 4. **User Summary:** Concise summary in user's conversational language (**Rule A**).

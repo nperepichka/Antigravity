@@ -42,8 +42,8 @@ flowchart TD
     GreenFix --> Describe
 
     SessionFriction["⚠️ User Feedback / Friction / Incident"] --> Retro["🔄 /retro (Ретроспективний аудит)"]
-    Retro --> RetroReport["📑 .local/retro.md (Аналіз + Промпт)"]
-    RetroReport -.-> Optimize["🔄 Optimization Protocol\n(Applied to GEMINI.md / Workflows via /learn)"]
+    Retro --> RetroReport["📑 .local/retro/retro-<N>.md + latest.md\n(Тільки за наявності тертя / зауважень)"]
+    RetroReport -.-> Optimize["🔄 Optimization Protocol\n(Applied via /investigate or /implement)"]
     Optimize -.-> Investigate
     Optimize -.-> Implement
 
@@ -95,7 +95,7 @@ flowchart TD
 
 - **Language Protocol (Rule A & E):** Комунікація з користувачем — мовою запиту, кодові артефакти, специфікації та документація — суворо англійською.
 - **Planning & Confirmation (Rule B):** Обов'язковий попередній аналіз та затвердження `implementation_plan.md` для складних або архітектурних задач перед редагуванням коду.
-- **Safety Boundaries (Rule C):** Захист від несанкціонованого встановлення пакетів, деструктивних Git-команд, операцій з БД та контейнерами.
+- **Safety Boundaries (Rule C):** Захист від несанкціонованого встановлення пакетів, деструктивних Git-команд, операцій з БД та контейнерами; повністю користувацький стейджинг (заборона автоматичного `git add`).
 - **Surgical Edits (Rule D):** Точкові правки (Minimal Diff) без небажаного масового реформатування коду, збереження відкритих контрактів та guardrails.
 - **Verification Protocol (Rule F):** Обов'язкова перевірка збірки, тестів, лінтерів та проактивне написання unit-тестів на нові публічні інтерфейси.
 - **Mistake Rectification (Rule G):** Миттєве хірургічне виправлення помилок за вказівкою користувача без оборонних виправдань, раціоналізацій чи вибачень.
@@ -124,6 +124,7 @@ flowchart TD
 **Файл:** `config/global_workflows/implement.md`
 - Працює у двох режимах: автономному (прямі задачі) та *Fast-Track* (підхоплює фази/підфази від `/investigate`).
 - Двофазний цикл: **Phase I** (компіляція, точкові тести, візуальна верифікація) + **Phase II** (стратегічний аудит, Bidirectional Diff Reconciliation та чистота за SOLID).
+- **Unstaged Working Tree Delivery:** перевірені зміни завжди передаються нестейдженими в робочому дереві (`git diff HEAD`) для особистого аудиту та ручного стейджингу користувачем.
 
 ### 4. `/debug` (RCA та усунення багів)
 **Файл:** `config/global_workflows/debug.md`
@@ -156,8 +157,9 @@ flowchart TD
 **Файл:** `config/global_workflows/retro.md`
 - Автоматизований ретроспективний аудит активної сесії діалогу та дій агента (**Read-Only**).
 - **Dual-Tier Forensic Scan:** миттєвий аналіз активного контексту з автоматичним фолбеком до `transcript.jsonl` для глибоких (>10 turns) або ущільнених сесій.
-- **Root-Cause Taxonomy & Minimal Intervention:** категоризація інцидентів за 5 типами (`MISSING_RULE`, `AMBIGUOUS_RULE`, `CONFLICTING_RULES`, `SKILL_DEFICIT`, `AGENT_DEVIATION`) із захистом від роздування правил при випадкових помилках моделі.
-- Формує структурований звіт та автономний промпт у `.local/retro.md` для надійного замкненого контуру оптимізації правил та воркфловів.
+- **Root-Cause Taxonomy & Remediation Integrity:** категоризація інцидентів за 5 типами (`MISSING_RULE`, `AMBIGUOUS_RULE`, `CONFLICTING_RULES`, `SKILL_DEFICIT`, `AGENT_DEVIATION`) з обов'язковим мапінгом інцидентів у правила або поясненням недоцільності.
+- **Sequential Versioning & Zero-Artifact Clean Sessions:** версіонує звіти у `.local/retro/retro-<N>.md` та дублює в `latest.md` лише при виявленні тертя; для чистих сесій звіти на диск не записуються.
+- **Cross-Workflow Ripple Audit & Token Density:** формує стислі (15–25 слів) правила з перевіркою впливу на інші воркфлови та готовими командами виконання через `/investigate` або `/implement`.
 
 ---
 
