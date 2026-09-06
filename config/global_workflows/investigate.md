@@ -60,12 +60,14 @@ Quantify requirements and evaluate steelmanned architectural options before DAG 
    - **Blast Radius & Migration Risk:** Impacted modules, schema migration hazards, backward compatibility.
    - **Testability & Determinism:** Ease of isolated, fast unit/integration testing without complex harnesses.
 
-4. **Dialectical Architecture Synthesis (Hybrid Blueprint):**
+4. **Dialectical Architecture Synthesis (`[DRAFT]` -> `[CRITIQUE]` -> `[ARBITRATION]` -> `[SYNTHESIS]`):**
    - Avoid simplistic winner-picking. Actively synthesize an optimal blueprint:
-     - **Strengths Extraction:** Extract the strongest traits of each option (e.g., Option 1's low-latency data path + Option 2's resilient state transition handling).
-     - **Layer-by-Layer Decision Matrix:** Map explicit choices across Data/Concurrency, Domain Logic, Resiliency/Retries, and API Contracts.
-     - **Target Synthesis Blueprint:** Formulate the unified design (hybrid or justified dominant path) combining strengths and eliminating weaknesses.
-     - **Rejection Rationale:** Explicitly document technical grounds for any discarded trade-off (e.g., excessive lock contention, unneeded network hop, operational dependency).
+     - **Draft Baseline (`[DRAFT]`):** Formulate the primary architecture path addressing 100% of functional requirements.
+     - **Adversarial Stress-Test (`[CRITIQUE]`):** Stress-test against non-obvious production hazards: partial mutations, concurrency/TOCTOU races, memory/RAM bloat, and serialization/contract drifts.
+     - **Arbitration Matrix (`[ARBITRATION]`):** Explicitly triage critique points into `[ADOPT]` (genuine production risks) and `[REJECT]` (over-engineering / premature optimization dismissed under KISS/YAGNI).
+     - **Layer-by-Layer Decision Matrix (`[SYNTHESIS]`):** Map explicit choices across Data/Concurrency, Domain Logic, Resiliency/Retries, and API Contracts.
+     - **Target Synthesis Blueprint:** Formulate the unified design combining strengths and eliminating weaknesses.
+     - **Rejection Rationale:** Explicitly document technical grounds for discarded trade-offs (e.g., excessive lock contention, unneeded network hop, speculative infrastructure).
 
 ---
 
@@ -110,7 +112,7 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 #### 5.2 Phase Files (`01_<name>.md`, `02_<name>.md`, ...)
 Use the corresponding structured template (all in **English**):
 
-- **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
+- **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Tactical Invariants & Failure-Mode Guard (pre-arbitrated atomicity, concurrency, memory footprint, and explicit anti-overengineering constraints) -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
 - **Template B `[MANUAL/DEVOPS]`:** Objective & Overview -> Step-by-Step Portal Navigation Guide -> Alternative CLI/IaC Commands -> Secrets & Output Variables Checklist -> Verification & Connectivity Test.
 - **Template C `[DATA]`:** Objective & Scope -> Prerequisites -> Idempotent Migration Script (with rollback & transactions) -> Validation Queries -> Definition of Done.
 - **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff HEAD` / `git diff --staged` if staged / `git diff <base>`) -> Test Environment Setup -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Documentation Audit & Sync (verify & update `README.md`, ADRs, API schemas, guides if applicable) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.

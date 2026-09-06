@@ -24,7 +24,8 @@ flowchart TD
     Explain --> TraceOutput["📊 Sequence / Flowchart + State Mapping (Chat / .local/)"]
     
     subgraph ExecutionGroup ["🚀 Цикл виконання та проміжного аудиту"]
-        Implement --> Tactical["🛠️ Phase I: Tactical Verification\n(Build, Targeted Tests, Visuals, Regression)"]
+        Implement --> PreAudit["🛡️ Pre-Coding Dialectical Audit\n([DRAFT] -> [CRITIQUE] -> [ARBITRATION])"]
+        PreAudit --> Tactical["🛠️ Phase I: Tactical Verification\n(Build, Targeted Tests, Visuals, Regression)"]
         Tactical --> Strategic["🏛️ Phase II: Strategic Audit\n(SOLID, Memory/Concurrency, Revert vs Patch)"]
         Strategic --> MilestoneQA["🧪 [QA] Milestone & Final Verification"]
         MilestoneQA --> ReviewGate["🧐 /review (Security OWASP, Performance, Diff Audit)"]
@@ -116,13 +117,14 @@ flowchart TD
 ### 2. `/investigate` (Дослідження, синтез рішень та декомпозиція)
 **Файл:** `config/global_workflows/investigate.md`
 - Глибокий аналіз задач, архітектури (HLD/ADR/PDF) без модифікації робочого коду (**Read-Only**).
-- **Mandatory Trade-off Synthesis:** обов'язковий порівняльний аналіз 2–3 підходів (Minimalist vs Enterprise vs Alternative) з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), Blast Radius та вибором або гібридним синтезом.
+- **Mandatory Dialectical Synthesis:** порівняльний аналіз підходів за схемою `[DRAFT] -> [CRITIQUE] -> [ARBITRATION] -> [SYNTHESIS]` з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), відхиленням зайвих ускладнень та гібридним синтезом.
 - Автоматичний підбір потрібних скілів під стек проєкту та планування проміжних QA-гейтів.
-- Генерує майстер-план `.local/tasks/**/00_overview.md` (із секцією `Architecture Decisions & Trade-off Synthesis`) та фазові специфікації `01_<name>.md` з підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]` (з повною регресією, аудитом/оновленням документації та `/review`).
+- Генерує майстер-план `.local/tasks/**/00_overview.md` та фазові специфікації `01_<name>.md` із вбудованими `Tactical Invariants & Failure-Mode Guard`, підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]` (з повною регресією, аудитом/оновленням документації та `/review`).
 
 ### 3. `/implement` (Автономна розробка та перевірка)
 **Файл:** `config/global_workflows/implement.md`
 - Працює у двох режимах: автономному (прямі задачі) та *Fast-Track* (підхоплює фази/підфази від `/investigate`).
+- **Pre-Coding Dialectical Audit:** обов'язковий стрес-тест нетривіальних задач перед написанням коду (`[DRAFT]` -> `[CRITIQUE]` за 5 інженерними лінзами -> `[ARBITRATION]` із відсіканням оверінжинірингу -> `[SYNTHESIS]`).
 - Двофазний цикл: **Phase I** (компіляція, точкові тести, візуальна верифікація) + **Phase II** (стратегічний аудит, Bidirectional Diff Reconciliation та чистота за SOLID).
 - **Unstaged Working Tree Delivery:** перевірені зміни завжди передаються нестейдженими в робочому дереві (`git diff HEAD`) для особистого аудиту та ручного стейджингу користувачем.
 

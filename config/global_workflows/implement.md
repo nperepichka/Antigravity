@@ -25,9 +25,29 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
    - **Input Formats:** Prompts, issues, standalone task files (`task.md`, `prompt.md`, `specs/*.md`), PDFs, or `/investigate` phase/sub-phase files (`01_<name>.md`, `01a_<name>.md`).
    - **Context & Conventions Ingestion:** Check `.agents/rules/repository-context.md` (if present) for non-obvious domain rules, conventions, and architectural guardrails.
    - **Skill Ingestion:** Check `00_overview.md`, task specifications, or stack requirements for recommended agent skills and activate them if available.
-   - **Fast-Track (`/investigate` specs):** If prerequisites are met, **adopt Scope, Target Files, Context Snippets, and DoD directly as the approved plan** and skip to Step 2.
-   - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) and obtain explicit user approval.
+   - **Fast-Track (`/investigate` specs):** If prerequisites are met, **adopt Scope, Target Files, Context Snippets, and DoD directly as the approved plan**, review tactical invariants (Step 1.3), and proceed to Step 2.
+   - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) incorporating the **Pre-Coding Dialectical Audit** (Step 1.3) and obtain explicit user approval.
    - **Minor / Straightforward:** Proceed directly to Step 2.
+3. **Pre-Coding Dialectical Audit Gate (`[DRAFT]` -> `[CRITIQUE]` -> `[ARBITRATION]` -> `[SYNTHESIS]`):**
+   *Executes prior to writing or modifying code to prevent both implementation tunnel-vision and runaway over-engineering.*
+   - **Activation Matrix (Rule B & Rule H Guard):**
+     - *Trivial / Minor (typos, 1–5 line bugfixes, mechanical renames/DTO additions):* **SKIP** entirely.
+     - *Fast-Track Phase (`/investigate` sub-phase with settled invariants):* **Lightweight / Inline** mental verification of target invariants before typing.
+     - *Complex Standalone / Data Hotpath / Non-Trivial Business Logic:* **MANDATORY**. Document explicitly in `implementation_plan.md` or session reasoning before code changes.
+   - **Dialectical Pipeline:**
+     1. **`[DRAFT]` Initial Strategy:** The direct, baseline implementation path, flow of calls, and primary data structures.
+     2. **`[CRITIQUE]` Adversarial Engineering Stress-Test:**
+        Critique the draft rigorously through 5 non-obvious production lenses (reject superficial checks like basic null guards):
+        - **L1 — Transactional Atomicity & Partial Failure:** If the operation fails midway (e.g. DB write commits, but queue publish / HTTP call / file I/O throws), does the system leave orphaned state or inconsistent entities? Is the mutation idempotent upon client retry?
+        - **L2 — Concurrency & TOCTOU Hazards:** Can parallel requests read stale state between validation and mutation (Time-Of-Check to Time-Of-Use)? Are there lost updates, uncoordinated cache reads, or race conditions under load?
+        - **L3 — Memory Pressure & Hotpath Footprint:** Is external data buffered entirely into RAM (`ReadAllBytes`, unbounded `ToList`) instead of streamed? Are there allocations inside tight loops, boxing, or regex ReDoS risks on untrusted input?
+        - **L4 — Lifecycle, Timeouts & Cancellation:** Are asynchronous operations wired to `CancellationToken` / `AbortController`? Does the flow avoid sync-over-async (`.Result`, `.Wait()`), unmonitored fire-and-forget tasks, and leaky unclosed connections?
+        - **L5 — Contract Drift & Backward Compatibility:** Does modifying DTOs or schema fields break in-flight queue messages, cached serialized JSON payloads, or downstream API consumers?
+     3. **`[ARBITRATION]` Triage & Anti-Overengineering Guard:**
+        Explicitly triage every critique point into two categories:
+        - **`[ADOPT]`:** Concrete, plausible operational risks addressed cleanly (e.g., wrap in atomic transaction, enforce composite index, stream large payload, pass cancellation token).
+        - **`[REJECT]`:** Unjustified, speculative complexity dismissed with technical rationale (e.g., *"Distributed Redis lock rejected — single-node service; DB row lock / transactional CTE suffices (KISS/YAGNI)"*).
+     4. **`[SYNTHESIS]` Target Implementation Blueprint:** The finalized, hardened approach transitioned into Phase I coding.
 
 ---
 
