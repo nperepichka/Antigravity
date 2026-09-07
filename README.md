@@ -24,7 +24,7 @@ flowchart TD
     Explain --> TraceOutput["📊 Sequence / Flowchart + State Mapping (Chat / .local/)"]
     
     subgraph ExecutionGroup ["🚀 Цикл виконання та проміжного аудиту"]
-        Implement --> PreAudit["🛡️ Pre-Coding Dialectical Audit\n([DRAFT] -> [CRITIQUE] -> [ARBITRATION])"]
+        Implement --> PreAudit["🛡️ Pre-Coding Dialectical Audit\n([DRAFT] -> [CRITIQUE] -> [ARBITRATION] -> [SYNTHESIS])"]
         PreAudit --> Tactical["🛠️ Phase I: Tactical Verification\n(Build, Targeted Tests, Visuals, Regression)"]
         Tactical --> Strategic["🏛️ Phase II: Strategic Audit\n(SOLID, Memory/Concurrency, Revert vs Patch)"]
         Strategic --> MilestoneQA["🧪 [QA] Milestone & Final Verification"]
@@ -43,7 +43,7 @@ flowchart TD
     GreenFix --> Describe
 
     SessionFriction["⚠️ User Feedback / Friction / Incident"] --> Retro["🔄 /retro (Ретроспективний аудит)"]
-    Retro --> RetroReport["📑 .local/retro/retro-<N>.md + latest.md\n(Тільки за наявності тертя / зауважень)"]
+    Retro --> RetroReport["📑 .local/retro/retro-local-<N>.md\nта/або retro-global-<N>.md\n(Тільки за наявності тертя)"]
     RetroReport -.-> Optimize["🔄 Optimization Protocol\n(Applied via /investigate or /implement)"]
     Optimize -.-> Investigate
     Optimize -.-> Implement
@@ -100,7 +100,7 @@ flowchart TD
 - **Surgical Edits (Rule D):** Точкові правки (Minimal Diff) без небажаного масового реформатування коду, збереження відкритих контрактів та guardrails.
 - **Verification Protocol (Rule F):** Обов'язкова перевірка збірки, тестів, лінтерів та проактивне написання unit-тестів на нові публічні інтерфейси.
 - **Mistake Rectification (Rule G):** Миттєве хірургічне виправлення помилок за вказівкою користувача без оборонних виправдань, раціоналізацій чи вибачень.
-- **Token Economics (Rule H):** Суворе ігнорування білд-артефактів, кеш-директорій (`.next`, `.nuxt`, `.pytest_cache`, `.turbo`), блокування перегляду повних lock-файлів та JIT-завантаження скілів (макс 1–3).
+- **Token Economics (Rule H):** Суворе ігнорування білд-артефактів, кеш-директорій (`.next`, `.nuxt`, `.pytest_cache`, `.turbo`), блокування перегляду повних lock-файлів, JIT-завантаження скілів (макс 1–3) та обмеження виводу команд/тестів (Bounded Command Output) для захисту від засмічення контексту.
 - **Hallucination Prevention & Intent Fidelity (Rule I):** Заборона кодування на здогадках; твердження базуються виключно на фактично прочитаних файлах і верифікованих специфікаціях.
 - **Solution Integrity & Anti-Masking (Rule J):** Усунення першопричини в моделі/контракті даних замість симптоматичних `if/else`-милиць; "Revert Over Stack" — відкат невдалої абстракції замість нашарування латок.
 
@@ -160,7 +160,8 @@ flowchart TD
 - Автоматизований ретроспективний аудит активної сесії діалогу та дій агента (**Read-Only**).
 - **Dual-Tier Forensic Scan:** миттєвий аналіз активного контексту з автоматичним фолбеком до `transcript.jsonl` для глибоких (>10 turns) або ущільнених сесій.
 - **Root-Cause Taxonomy & Remediation Integrity:** категоризація інцидентів за 5 типами (`MISSING_RULE`, `AMBIGUOUS_RULE`, `CONFLICTING_RULES`, `SKILL_DEFICIT`, `AGENT_DEVIATION`) з обов'язковим мапінгом інцидентів у правила або поясненням недоцільності.
-- **Sequential Versioning & Zero-Artifact Clean Sessions:** версіонує звіти у `.local/retro/retro-<N>.md` та дублює в `latest.md` лише при виявленні тертя; для чистих сесій звіти на диск не записуються.
+- **Scope Bifurcation & Zero-Artifact Clean Sessions:** розділяє оптимізації на локальні (`.local/retro/retro-local-<N>.md` для коду й правил проєкту) та глобальні (`.local/retro/retro-global-<N>.md` для загальних правил у `GEMINI.md`); повністю ліквідовано дублікати `latest.md`; для чистих сесій звіти на диск не записуються.
+- **Anti-Rule-Bloat Triage:** блокує витік специфіки локальних бібліотек, діалогів чи REST API у глобальний `GEMINI.md`, спрямовуючи їх строго в локальний контекст репозиторія.
 - **Cross-Workflow Ripple Audit & Token Density:** формує стислі (15–25 слів) правила з перевіркою впливу на інші воркфлови та готовими командами виконання через `/investigate` або `/implement`.
 
 ---

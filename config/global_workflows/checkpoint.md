@@ -33,11 +33,12 @@ The workflow operates in two distinct modes based on the input argument:
 2. **Workspace Delta:** Run `git status -s` and `git diff --name-status HEAD` to identify modified, newly created, or uncommitted files (staged or unstaged) across the workspace.
 
 #### Step 2: Multi-Track Synthesis
-Decompose the session findings into four structured dimensions (supports multiple parallel tasks):
+Decompose the session findings into five structured dimensions (supports multiple parallel tasks):
 - **Active Workstreams & Tasks:** Key tasks touched during the session (e.g. Task A: Auth Refactor, Task B: DB Schema, Task C: Workflow Tuning) with their current completion status.
 - **Key Architectural Decisions & Invariants:** Core decisions, trade-offs, constraints, conventions, and rules established.
 - **Environment & Workspace Delta:** Changed files, branch status, dependencies added, and verification state (tests passing/failing).
 - **Pending Items & Next Actions:** Clear, actionable steps remaining for each workstream.
+- **Suggested Skills:** Targeted 1–3 skills for pending workstreams (per **Rule H**).
 
 #### Step 3: Interactive Verification & Filtering
 1. **Interactive Selection (`ask_question`):** Present extracted workstreams and critical decisions to the user using multi-select checkboxes.

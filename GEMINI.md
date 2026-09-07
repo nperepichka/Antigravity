@@ -61,6 +61,7 @@
 - **Targeted Tooling & Lazy Reads:**
   - Prefer `grep_search` with `Includes` and line ranges (`StartLine`/`EndLine` for files >500 lines) over broad scans.
   - Load max 1–3 domain skills JIT only when task directly targets their specialized scope.
+  - **Bounded Command Output:** Run test suites and CLI tools with quiet or failure-focused flags; never stream unbounded passing logs into context.
 
 ### Rule I: Hallucination Prevention & Intent Fidelity
 - **Ground Truth Only (No Guessing):** Never claim unseen file contents, function signatures, config keys, or API behavior. State uncertainty explicitly or inspect via tools before coding. Never silently resolve ambiguities or chain unverified assumptions.

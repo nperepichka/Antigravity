@@ -28,14 +28,14 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 *Must complete before modifying ANY production code:*
 1. **Isolated Repro Test & State Isolation:** Add a targeted unit/integration test reproducing the exact failure (or minimal repro script). Ensure strict state isolation (rollback transactions, in-memory DB, reset mocks/env in `tearDown`) to prevent flaky test pollution.
 2. **Minimization (The Tight Loop):** Shrink the repro to the smallest scenario that still goes red (cut inputs, callers, config one at a time). Every remaining element must be load-bearing for the failure. A minimal repro shrinks the hypothesis space and becomes a clean regression test.
-2. **Execute & Confirm Failure:** Run using fast targeted runners:
+3. **Execute & Confirm Failure:** Run using fast targeted runners:
    - `.NET:` `dotnet test --filter ...`
    - `Python:` `pytest path/to/test.py::test_func`
    - `JS/TS:` `npm test -- path/to/test.ts -t "repro"`
    - `Rust:` `cargo test repro`
    Confirm test fails with the **exact reported error/assertion**.
-3. **Isolated In-Memory Micro-Evaluation (Pure Logic):** If the defect resides in pure algorithmic logic, complex regex, parsers, or mathematical state transitions, run a lightweight in-memory snippet (via Node / Python / REPL / CLI) passing boundary fixtures for instant verification without spinning up heavy infrastructure.
-4. **Circuit Guard:** If defect cannot be reproduced, do NOT attempt blind fixes. Check race conditions, async deadlocks, missing env vars, or DB state. Request clarifying logs from user.
+4. **Isolated In-Memory Micro-Evaluation (Pure Logic):** If the defect resides in pure algorithmic logic, complex regex, parsers, or mathematical state transitions, run a lightweight in-memory snippet (via Node / Python / REPL / CLI) passing boundary fixtures for instant verification without spinning up heavy infrastructure.
+5. **Circuit Guard:** If defect cannot be reproduced, do NOT attempt blind fixes. Check race conditions, async deadlocks, missing env vars, or DB state. Request clarifying logs from user.
 
 ---
 
@@ -56,7 +56,7 @@ Autonomous hypothesis-driven debugging loop for deterministic defect reproductio
 1. **Minimal Patch (Rule J):** Apply the minimal robust fix directly resolving the root cause per **Rule D** and **Rule J**. Strictly avoid symptom-masking workarounds or special-case conditionals.
 2. **Fast Inner Loop:** Re-run reproduction test until **100% green**.
 3. **Hypothesis Reversion Gate (Rule J):** If an attempted fix fails or introduces regressions, perform a targeted self-revert of affected uncommitted files (via surgical code replacement or file-scoped `git checkout -- <file>`) before testing alternative hypotheses. Never accumulate broken edits (**Revert Over Stack**).
-4. **Full Regression Gate:** Run full project build, typecheck, lint, and test suite. Resolve any breakages until the entire suite is green.
+4. **Full Regression Gate:** Run full project build, typecheck, lint, and test suite with bounded/quiet flags per Rule H. Resolve any breakages until the entire suite is green.
 
 ---
 

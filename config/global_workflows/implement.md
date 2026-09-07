@@ -12,11 +12,11 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
 
 ### Step 1: Toolchain Detection & Task Alignment
 1. **Stack & Toolchain Detection:**
-   - **.NET:** `*.csproj`, `*.sln` -> `dotnet build`, `dotnet test`
-   - **Java:** Maven `pom.xml` -> `.\mvnw.cmd` / `./mvnw` `compile`/`test`; Gradle `build.gradle[.kts]` -> `.\gradlew.bat` / `./gradlew` `build`/`test`/`check`
-   - **JS / TS (Bun/Node/PNPM/Yarn):** `package.json`, lockfiles -> inspect `scripts` (`typecheck`, `lint`, `test`, `build`)
-   - **Python:** `pyproject.toml`, `uv.lock`, `requirements.txt` -> `pytest`, `ruff check`, `mypy`/`pyright`
-   - **Rust:** `Cargo.toml` -> `cargo check`, `cargo test`, `cargo clippy`
+   - **.NET:** `*.csproj`, `*.sln` -> `dotnet build`, `dotnet test --logger "console;verbosity=minimal"`
+   - **Java:** Maven `pom.xml` -> `.\mvnw.cmd` / `./mvnw` `compile`/`test -q`; Gradle `build.gradle[.kts]` -> `.\gradlew.bat` / `./gradlew` `build`/`test -q`/`check`
+   - **JS / TS (Bun/Node/PNPM/Yarn):** `package.json`, lockfiles -> inspect `scripts` (`typecheck`, `lint`, `test -- --bail` / `bun test --only-failures`, `build`)
+   - **Python:** `pyproject.toml`, `uv.lock`, `requirements.txt` -> `pytest -q --tb=short`, `ruff check`, `mypy`/`pyright`
+   - **Rust:** `Cargo.toml` -> `cargo check`, `cargo test -- -q`, `cargo clippy`
    - **Go:** `go.mod` -> `go build ./...`, `go test ./...`, `golangci-lint run`
    - **Greenfield:** Scaffold standard layout, dependency definitions, and initial configs.
    - **Monorepo:** (`nx`, `turbo`, `lerna`, `pnpm-workspace`) Scope build/test/lint commands to affected package.
@@ -62,7 +62,7 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 - **2.1 Build & Lint:** Run compilation, typechecking, and linters. Fix all errors/warnings before proceeding.
 - **2.2 Balanced Testing & Live Execution (Unit Coverage + Live Seam Check):**
   - *Targeted Unit Test Coverage (Rule F):* Proactively write fast, focused unit tests covering new public APIs, logical branches, domain logic, and error paths. Structure tests at public seams and pure logic; avoid brittle multi-layered mock chains that test implementation details.
-  - *Fast Inner Loop:* Run targeted tests for minimal changes (`dotnet test --filter`, `pytest ::`, `npm test -t`, `cargo test`). Run full module suites for broad changes.
+  - *Fast Inner Loop & Output Scoping (Rule H):* Run targeted tests for minimal changes (`dotnet test --filter`, `pytest :: -q`, `npm test -t -- --bail`, `cargo test -- -q`). Always apply quiet or failure-focused flags to suppress passing markers and avoid context bloat while preserving failure traces. Run full module suites for broad changes.
   - *Targeted Live Execution (Rule of One):* In addition to unit tests, execute at least **one linear real run** of the modified entry point (CLI command with realistic arguments, API request, or script) to verify runtime wiring, DI, configuration, and serialization without constructing heavy E2E test frameworks.
 - **2.3 Visual & Document Verification (Conditional — UI, PDF, DOCX, HTML, Images):**
   - Render output to PNG using Windows CLI (`pdftoppm`, LibreOffice headless CLI, Playwright) or Python fallback (`pymupdf`/`fitz`, `pdf2image`).

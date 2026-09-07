@@ -13,6 +13,7 @@ This workspace is the local staging and working copy for the user's global Googl
 - **Solution Integrity (Rule J):** Address root causes directly in contracts and domain models; never add symptom-masking conditionals or stack patches on broken foundations.
 - **Dual-Language Invariant (Rule A + E):** User interactions and markdown artifacts adhere to the user's active language; rule definitions, workflows, and code identifiers remain strictly in English.
 - **Lazy JIT Skill Loading (Rule H):** Domain skills load on-demand (max 1–3) only when squarely matching specialized tasks; no speculative meta-skill loading.
+- **Unstaged Working Tree Delivery (Rule C):** Verified changes MUST remain unstaged in the working tree for user inspection; never run `git add` automatically.
 
 ## Operational Context
 - **Manual User Sync Model:** The user manually deploys/copies verified changes from this repository to target global locations (`~/.gemini/config/`). Agents MUST NOT attempt to touch or sync external global paths directly.
