@@ -79,7 +79,7 @@ flowchart TD
     │   ├── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
     │   └── retro.md            # /retro — ретроспективний аудит сесії та промпт на оптимізацію
     ├── templates/              # Шаблони конфігурацій (hooks.json.example тощо)
-    └── skills/                 # 31 спеціалізований інженерний скіл (Domain Capabilities)
+    └── skills/                 # 32 спеціалізовані інженерні скіли (Domain Capabilities)
 ```
 
 ### Як підключити:
@@ -207,5 +207,6 @@ flowchart TD
 | **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |
 | **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture`, `browser-to-api` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper), сесій у Chrome (CDP) та виведення OpenAPI 3.1 специфікацій і SDK з HTTP/HAR трафіку |
 | **📄 Документи & Технічна література** | `pdf-official`, `docx-official`, `xlsx-official`, `pptx-official`, `technical-book-writer` | Програмна генерація/аналіз PDF/DOCX/XLSX/PPTX та проєктування й написання технічних книг |
+| **⚖️ Контракти & Delivery Governance** | `contract-delivery-auditor` | Комплексний 6-фазний аудит SOW/MSA контрактів: комерційна математика, rate cards, role caps, графіки залежностей, conditional IP assignment, vendor background IP, deemed acceptance, cash flow/suspension rights та ліміти відповідальності |
 
 

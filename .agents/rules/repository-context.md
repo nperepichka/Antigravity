@@ -1,7 +1,7 @@
 # Repository Meta-Context: Antigravity Config Master
 
 ## System Identity & Domain
-This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 31 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
+This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 32 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
 
 ## Architecture & Tech Stack
 - **Pattern:** Modular declarative configuration — Markdown prompt engineering with YAML frontmatter, starter templates, and helper scripts.
