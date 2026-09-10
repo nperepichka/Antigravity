@@ -16,9 +16,10 @@ Objective, comprehensive code review in **strict Read-Only mode** combining **Bi
   1. *Forward Audit (Coverage):* Ensure 100% of explicit/implicit requirements map to concrete diff logic.
   2. *Backward Audit (Scope Control):* Ensure 0% unrequested changes, dead code, or side-effect edits exist in the diff.
 - **Static & Abstract Flow Proof:** Analytically verify data flows, boundary conditions, and failure propagation across all branching paths without requiring a full environment or UI spin-up.
-- **Actionable Critique:** Every finding must cite exact file path, line numbers, risk explanation, and a concrete ````diff```` fix.
+- **Actionable Critique:** Every finding must cite exact file path, line numbers, risk explanation, and a concrete ````diff```` fix. Format all locations and cited symbols with clickable line-range links (`[Symbol / File](file:///path/to/file#L10-L25)`).
 - **Documentation & Contract Synchronization:** Verify that any changes affecting public API shapes, data models, environment variables, database schemas, CLI flags, or architectural flows are accurately reflected in the project's documentation (`README.md`, OpenAPI specs, ADRs, setup runbooks, code docstrings).
 - **Verified References Only (Rule I):** Every file path, line number, function name, and code snippet cited in the report MUST be sourced from actual `git diff`, `view_file`, or `grep_search` output. Never cite phantom locations or fabricate snippets from memory.
+- **Bifurcated Delivery Protocol:** For uncommitted/staged working tree changes (`git diff HEAD`, `git diff --staged`), deliver the review directly in chat in the user's active language (**Rule A**) with ZERO disk artifacts. For committed targets (external branches, PRs, commit ranges), compile a formal **English** report in **`.local/review_report.md`** (**Rule E**) with a clickable link.
 
 ---
 
@@ -139,7 +140,7 @@ Evaluate the diff against the complete multi-dimensional audit dimensions:
 
 ## Step 4: Report Generation & Verification Artifacts
 
-Format the review report as `Code Review Report: [Branch/Target]` (or write to `review_report.md` for large reviews):
+Format the review report using the structure below. For **committed changes** (external branches, PRs, commit ranges), save the full technical report in **English** to **`.local/review_report.md`** (**Rule E**). For **uncommitted/staged changes** (local working tree), skip file creation to avoid cluttering the workspace. In both cases, deliver the complete, identically structured review directly in the dialogue in the user's active language (**Rule A**), keeping code identifiers, file paths, diff snippets, and symbols in **English** (**Rule E**).
 
 ### 1. Executive Summary & Verdict
 - **Verdict:** 🟢 **APPROVED** / 🟡 **APPROVED WITH SUGGESTIONS** / 🔴 **REQUEST CHANGES**
@@ -148,9 +149,9 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 ### 2. Bidirectional Requirement-to-Diff Verification Table
 | Requirement ID | Requirement Description | Implementation Location | Logic / Invariant Proof | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `[REQ-1]` | [Requirement text] | `path/to/file.ext:lines` | [Traced data flow, boundary behavior proof] | **Verified** / **Gap** |
-| `[REQ-2]` | [Requirement text] | `path/to/file.ext:lines` | [Error handling / zero-state handled cleanly] | **Verified** / **Gap** |
-| `[REQ-N]` | [Requirement text] | `path/to/file.ext:lines` | [Non-functional / contract validation] | **Verified** / **Gap** |
+| `[REQ-1]` | [Requirement text] | [`path/to/file.ext#L10-L25`](file:///path/to/file.ext#L10-L25) | [Traced data flow, boundary behavior proof] | **Verified** / **Gap** |
+| `[REQ-2]` | [Requirement text] | [`path/to/file.ext#L10-L25`](file:///path/to/file.ext#L10-L25) | [Error handling / zero-state handled cleanly] | **Verified** / **Gap** |
+| `[REQ-N]` | [Requirement text] | [`path/to/file.ext#L10-L25`](file:///path/to/file.ext#L10-L25) | [Non-functional / contract validation] | **Verified** / **Gap** |
 
 ### 3. Static Verification Checklist
 - [x] **Scope Integrity:** 0 unrequested changes or side-effect edits in diff.
@@ -165,7 +166,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 
 #### 🔴 Critical Findings (Must Fix)
 *Vulnerabilities, data corruption/loss, crashes, contract breakage, or missing requirement implementations.*
-- **Location:** `[file_path#Llines]`
+- **Location:** [`file_path#Llines`](file:///absolute/path/to/file.ext#L10-L25)
 - **Category:** (Security | Invariant Broken | Concurrency | Contract Breakage | Requirement Gap | Breaking Spec Drift)
 - **Problem & Impact:** Detailed technical explanation of the failure mode.
 - **Actionable Fix:**
@@ -176,7 +177,7 @@ Format the review report as `Code Review Report: [Branch/Target]` (or write to `
 
 #### 🟡 Major Improvements (Should Fix)
 *Performance bottlenecks, potential race conditions, missing edge guards, architectural coupling.*
-- **Location:** `[file_path#Llines]`
+- **Location:** [`file_path#Llines`](file:///absolute/path/to/file.ext#L10-L25)
 - **Category:** (Performance | Resource Leak | Error Handling | Architecture | Documentation Drift / Stale Spec)
 - **Problem & Impact:** Technical explanation.
 - **Actionable Fix:** Concrete ````diff```` block.
@@ -202,6 +203,7 @@ When `/review` is invoked as part of an autonomous dev/QA loop (e.g. within `/im
 
 ## Step 6: Final Delivery
 
-1. The technical review report MUST be in **English** (**Rule E**).
-2. Present the findings to the user with a concise conversational summary in the user's language (**Rule A**).
-3. If reviewing a large PR or branch, save the detailed report to `review_report.md` in the project root or artifacts directory and provide a clickable link.
+1. **Bifurcated Delivery Protocol:**
+   - **Uncommitted / Staged Scope (Working Tree / Self-Review):** When reviewing uncommitted (`git diff HEAD`) or staged (`git diff --staged`) working tree changes, deliver the complete review directly in the dialogue in the user's active language (**Rule A**) with **zero file creation**.
+   - **Committed Scope (Branch / PR / External Review):** When reviewing committed diffs (`<base>...<target>`, commit ranges, or external branches), compile the full technical report in **English** (**Rule E**) and save it to **`.local/review_report.md`** (ensuring `.local/` exists). Present the identical structured review in the dialogue in the user's active language (**Rule A**) with a clickable link to [`.local/review_report.md`](file:///path/to/.local/review_report.md).
+   - **Code & Identifier Invariant:** Code identifiers, file paths, line ranges, diff snippets, and technical symbols remain strictly in **English** (**Rule E**) across both modes.

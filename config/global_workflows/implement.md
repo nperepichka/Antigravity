@@ -26,7 +26,7 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
    - **Context & Conventions Ingestion:** Check `.agents/rules/repository-context.md` (if present) for non-obvious domain rules, conventions, and architectural guardrails.
    - **Skill Ingestion:** Check `00_overview.md`, task specifications, or stack requirements for recommended agent skills and activate them if available.
    - **Fast-Track (`/investigate` specs):** If prerequisites are met, **adopt Scope, Target Files, Context Snippets, and DoD directly as the approved plan**, review tactical invariants (Step 1.3), and proceed to Step 2.
-   - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) incorporating the **Pre-Coding Dialectical Audit** (Step 1.3) and obtain explicit user approval.
+   - **Standalone Complex / Greenfield:** Formulate `implementation_plan.md` (**Rule B**) with `RequestFeedback: true` and `UserFacing: true` in `ArtifactMetadata` (triggering the IDE's native "Proceed" button), incorporating the **Pre-Coding Dialectical Audit** (Step 1.3), and wait for explicit user approval (re-plan on feedback) before modifying code.
    - **Minor / Straightforward:** Proceed directly to Step 2.
 3. **Pre-Coding Dialectical Audit Gate (`[DRAFT]` -> `[CRITIQUE]` -> `[ARBITRATION]` -> `[SYNTHESIS]`):**
    *Executes prior to writing or modifying code to prevent both implementation tunnel-vision and runaway over-engineering.*
@@ -101,7 +101,7 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
    - After Phase I & II verification passes for a given phase/sub-phase, keep all verified modified and new files unstaged in the working tree.
    - NEVER run `git add` automatically. All staging and committing are strictly user-driven — always leave verified changes unstaged in the working tree for user inspection.
    - Unstaged working tree modifications remain cleanly trackable via `git status -s` and diff extraction (`git diff HEAD`, or `git diff --staged` if staged manually by the user) during subsequent Milestone/Final `[QA]` reviews.
-2. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
+2. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Format all referenced code symbols with clickable line-range links (`[Symbol](file:///path#L10-L25)`). For multi-step UI or visual diff progressions, utilize ````carousel```` blocks to condense vertical space. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
 3. **Phase / Sub-Phase Tracking & Handoff:**
    - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
      - **Automated Next Phase (`[CODE]`, `[DATA]`):** Provide clickable link and ready `/implement <next-phase>` command.

@@ -68,6 +68,7 @@ Quantify requirements and evaluate steelmanned architectural options before DAG 
      - **Layer-by-Layer Decision Matrix (`[SYNTHESIS]`):** Map explicit choices across Data/Concurrency, Domain Logic, Resiliency/Retries, and API Contracts.
      - **Target Synthesis Blueprint:** Formulate the unified design combining strengths and eliminating weaknesses.
      - **Rejection Rationale:** Explicitly document technical grounds for discarded trade-offs (e.g., excessive lock contention, unneeded network hop, speculative infrastructure).
+     - **Interactive Disambiguation Gate (`ask_question`):** When choosing between discrete steelmanned alternatives (Option A vs. Option B vs. Option C) or resolving underspecified trade-offs, invoke the native `ask_question` tool to present an interactive modal choice dialog. Never guess user intent or proceed to DAG decomposition without explicit selection.
 
 ---
 
@@ -123,4 +124,4 @@ Use the corresponding structured template (all in **English**):
 1. All generated specifications MUST be in **English** (**Rule E**).
 2. Summarize findings, skill recommendations, and phase structure in user's language (**Rule A**).
 3. Provide clickable markdown links to `00_overview.md` and phase files.
-4. Highlight trade-offs, open questions, skill install requests (**Rule C** confirmation), and manual prerequisites.
+4. Highlight trade-offs, open questions, skill install requests (**Rule C** confirmation), and manual prerequisites. Use the native `ask_question` tool whenever user choice between discrete paths is required.

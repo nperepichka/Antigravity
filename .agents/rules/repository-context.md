@@ -16,5 +16,6 @@ This workspace is the local staging and working copy for the user's global Googl
 - **Unstaged Working Tree Delivery (Rule C):** Verified changes MUST remain unstaged in the working tree for user inspection; never run `git add` automatically.
 
 ## Operational Context
-- **Manual User Sync Model:** The user manually deploys/copies verified changes from `config/` and `GEMINI.md` to target global locations (`~/.gemini/config/`). Standalone automation tools in `scripts/` are local IDE maintenance utilities and are not synced to global agent config. Agents MUST NOT attempt to touch or sync external global paths directly.
+- **Workspace-Only Operations (Local Staging):** All files in this workspace (`GEMINI.md`, `config/**`, `scripts/**`) are local working copies. Agents MUST operate exclusively within this workspace. The user personally copies verified changes to external destinations (`~/.gemini/config/` etc.) upon completion. Agents MUST NEVER attempt to access, modify, or sync external paths directly.
+- **Maintenance Tools Isolation:** Standalone automation tools in `scripts/` are local IDE maintenance utilities and are not synced to global agent config.
 - **Immediate Execution:** Sessions targeting rule, workflow, or skill modifications are direct meta-engineering tasks requiring zero scaffolding or repo orientation overhead.

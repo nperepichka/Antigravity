@@ -11,7 +11,7 @@ Autonomous, high-fidelity exploratory tracing of subsystems, features, data flow
 ## Core Directives
 
 - **Strict Read-Only Safety:** ZERO code modifications, package installations, or state-altering commands (**Rule C**). Purely exploratory analysis and structured markdown delivery.
-- **Verified Symbol & Call-Stack Tracing (Rule I):** Trace callers, callees, data models, and API endpoints using verified `grep_search` and range-limited `view_file`. **Never speculate or fabricate signatures, paths, or execution flows from memory.**
+- **Verified Symbol & Call-Stack Tracing (Rule I):** Trace callers, callees, data models, and API endpoints using verified `grep_search` and range-limited `view_file`. Format all cited symbols with clickable line-range links (`[Symbol](file:///path#L10-L25)`). **Never speculate or fabricate signatures, paths, or execution flows from memory.**
 - **Zero Planning Overhead:** Delivers answers directly in conversational output (or saves to `.local/explorations/<topic-slug>.md` only if explicitly requested with `--save`). Does NOT generate DAG plans, phase specifications, or DoD checklists.
 - **Visual-First Clarity:** Every trace MUST include a Mermaid diagram (`sequenceDiagram` for request/response or event lifecycles, or `flowchart TD/LR` for multi-service/component topologies).
 - **Storage & State Grounding:** Explicitly map data persistence (tables, columns, document collections), caching layers (Redis keys, TTLs, in-memory caches), and DTO transformations.
