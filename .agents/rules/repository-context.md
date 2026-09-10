@@ -1,11 +1,11 @@
 # Repository Meta-Context: Antigravity Config Master
 
 ## System Identity & Domain
-This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 31 specialized domain skills (`config/skills/`), and ecosystem templates (`config/templates/`). All files outside `.agents/` mirror global configuration assets.
+This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 31 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
 
 ## Architecture & Tech Stack
 - **Pattern:** Modular declarative configuration — Markdown prompt engineering with YAML frontmatter, starter templates, and helper scripts.
-- **Module Structure:** `GEMINI.md` / `AGENTS.md` (core rules & guardrails) → `config/global_workflows/` (context, investigate, explain, implement, debug, review, describe, checkpoint, retro) → `config/skills/` (domain capability bundles) → `config/templates/` (lifecycle hooks & configs).
+- **Module Structure:** `GEMINI.md` / `AGENTS.md` (core rules & guardrails) → `config/global_workflows/` (context, investigate, explain, implement, debug, review, describe, checkpoint, retro) → `config/skills/` (domain capability bundles) → `scripts/` (PowerShell maintenance and multi-profile session automation) → `config/templates/` (lifecycle hooks & configs).
 
 ## Non-Obvious Conventions & Guardrails
 - **Tandem Lifecycle Synergy:** All 9 workflows form a unified pipeline; changes to one workflow must preserve interoperability invariants with the others.
@@ -16,5 +16,5 @@ This workspace is the local staging and working copy for the user's global Googl
 - **Unstaged Working Tree Delivery (Rule C):** Verified changes MUST remain unstaged in the working tree for user inspection; never run `git add` automatically.
 
 ## Operational Context
-- **Manual User Sync Model:** The user manually deploys/copies verified changes from this repository to target global locations (`~/.gemini/config/`). Agents MUST NOT attempt to touch or sync external global paths directly.
+- **Manual User Sync Model:** The user manually deploys/copies verified changes from `config/` and `GEMINI.md` to target global locations (`~/.gemini/config/`). Standalone automation tools in `scripts/` are local IDE maintenance utilities and are not synced to global agent config. Agents MUST NOT attempt to touch or sync external global paths directly.
 - **Immediate Execution:** Sessions targeting rule, workflow, or skill modifications are direct meta-engineering tasks requiring zero scaffolding or repo orientation overhead.
