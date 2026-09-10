@@ -1,10 +1,10 @@
 ---
-description: Autonomous development, compilation, testing, visual document verification, and strategic review cycle across multi-stack projects (.NET, Java, JS/TS/Bun, Python, Rust, Go) for existing and greenfield repositories.
+description: Autonomous development, compilation, testing, visual document verification, and strategic review cycle across multi-stack projects (.NET, Java, JS/TS/Bun, Python, Rust, Go) for single phases or sequential batch queues (/implement all, /implement 01..03).
 ---
 
 # Auto-Verify Dev Loop
 
-Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **Phase II (Strategic Review)**.
+Autonomous engineering cycle supporting both **Single-Phase Execution** and **Sequential Batch Queue Mode** (`all`, `queue`, `batch`, `01..03`, or conversational equivalents in active language): **Phase I (Tactical Verification)** + **Phase II (Strategic Review)**.
 
 ---
 
@@ -21,7 +21,23 @@ Autonomous two-phase engineering cycle: **Phase I (Tactical Verification)** + **
    - **Greenfield:** Scaffold standard layout, dependency definitions, and initial configs.
    - **Monorepo:** (`nx`, `turbo`, `lerna`, `pnpm-workspace`) Scope build/test/lint commands to affected package.
    - **Conditional Baseline Sanity Check:** At the very start of a session or when working in an unfamiliar/unverified environment (only when necessary, do not repeat across consecutive phase runs), run a quick baseline build/test to ensure the repo is green prior to edits. If broken, warn user upfront.
-2. **Task Ingestion & Skill Alignment:**
+2. **Task Ingestion & Execution Mode Resolution:**
+   - **Mode Resolution (Single vs. Sequential Batch Queue):**
+     - **Single Mode:** Triggered by `/implement <phase>` (e.g., `/implement 01_domain_models.md`, `/implement 01a`). Executes the specified phase and halts at Step 4.3 with the next phase handoff.
+     - **Batch Queue Mode:** Triggered by single-command batch requests:
+       - *Keywords:* `all`, `--all`, `queue`, `batch`, or semantic equivalents in user's active language (e.g., asking to run "all", "everything", "queue", or "all in sequence").
+       - *Range syntax:* `<start>..<end>` (e.g. `/implement 01..04`, `/implement 01a..02b`).
+     - **Queue Resolution Protocol:**
+       1. Ingest the Execution Matrix in `00_overview.md` (or task list in `task.md`).
+       2. Filter pending phases (`[ ] Pending` or `[>] In Progress`). If a range is given, constrain execution to that range.
+       3. Extract target phase specs in topological DAG order.
+       4. Display Queue Initialization Banner in chat:
+          ```markdown
+          📋 [QUEUE INITIALIZED] Found N pending automated phase(s) in 00_overview.md:
+          - [1/N] Phase 01: 01_domain_entities.md [CODE]
+          - [2/N] Phase 02: 02_api_endpoints.md [CODE]
+          ```
+       5. Sequentially iterate through each phase using the isolated Phase Pipeline (Steps 1.3 -> Step 2 -> Step 3 -> Step 4.3).
    - **Input Formats:** Prompts, issues, standalone task files (`task.md`, `prompt.md`, `specs/*.md`), PDFs, or `/investigate` phase/sub-phase files (`01_<name>.md`, `01a_<name>.md`).
    - **Context & Conventions Ingestion:** Check `.agents/rules/repository-context.md` (if present) for non-obvious domain rules, conventions, and architectural guardrails.
    - **Skill Ingestion:** Check `00_overview.md`, task specifications, or stack requirements for recommended agent skills and activate them if available.
@@ -62,7 +78,7 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 - **2.1 Build & Lint:** Run compilation, typechecking, and linters. Fix all errors/warnings before proceeding.
 - **2.2 Balanced Testing & Live Execution (Unit Coverage + Live Seam Check):**
   - *Targeted Unit Test Coverage (Rule F):* Proactively write fast, focused unit tests covering new public APIs, logical branches, domain logic, and error paths. Structure tests at public seams and pure logic; avoid brittle multi-layered mock chains that test implementation details.
-  - *Fast Inner Loop & Output Scoping (Rule H):* Run targeted tests for minimal changes (`dotnet test --filter`, `pytest :: -q`, `npm test -t -- --bail`, `cargo test -- -q`). Always apply quiet or failure-focused flags to suppress passing markers and avoid context bloat while preserving failure traces. Run full module suites for broad changes.
+  - *Fast Inner Loop & Output Scoping (Rule H):* Run targeted tests for minimal changes (`dotnet test --filter`, `pytest :: -q`, `npm test -t -- --bail`, `cargo test -- -q`). Always apply quiet or failure-focused flags to suppress passing markers and avoid context bloat while preserving failure traces. Run full module suites for broad changes. In **Batch Queue Mode**, quiet flags are MANDATORY across all phases to preserve context window longevity and prevent token exhaustion.
   - *Targeted Live Execution (Rule of One):* In addition to unit tests, execute at least **one linear real run** of the modified entry point (CLI command with realistic arguments, API request, or script) to verify runtime wiring, DI, configuration, and serialization without constructing heavy E2E test frameworks.
 - **2.3 Visual & Document Verification (Conditional — UI, PDF, DOCX, HTML, Images):**
   - Render output to PNG using Windows CLI (`pdftoppm`, LibreOffice headless CLI, Playwright) or Python fallback (`pymupdf`/`fitz`, `pdf2image`).
@@ -103,10 +119,40 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
    - Unstaged working tree modifications remain cleanly trackable via `git status -s` and diff extraction (`git diff HEAD`, or `git diff --staged` if staged manually by the user) during subsequent Milestone/Final `[QA]` reviews.
 2. **Walkthrough & Hygiene (`walkthrough.md`):** Summary of changes, verification proof (test logs / rendered visuals), and architectural notes. Format all referenced code symbols with clickable line-range links (`[Symbol](file:///path#L10-L25)`). For multi-step UI or visual diff progressions, utilize ````carousel```` blocks to condense vertical space. Verify `git status` to ensure zero leftover scratch/dump files in the workspace.
 3. **Phase / Sub-Phase Tracking & Handoff:**
-   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`. If next phase/sub-phase (`[ ] Pending`) exists, **cross-phase drift check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
-     - **Automated Next Phase (`[CODE]`, `[DATA]`):** Provide clickable link and ready `/implement <next-phase>` command.
-     - **Next Phase `[QA]` (Milestone / Final Review):** Clearly state the cumulative list of covered phases (e.g., `01`, `02`) and provide ready `/review` command targeting `git diff HEAD` (or `git diff --staged` if manually staged) under clean context.
-     - **Manual Next Phase (`[MANUAL/DEVOPS]`):** Present portal navigation guide, cloud checklist, and output variables, then prompt user to complete manual steps before proceeding to dependent code phases.
+   - *When using `/investigate` tasks:* Mark phase/sub-phase acceptance criteria `[x]`, update `00_overview.md` status (for main phases `01` or sub-phases `01a`) from `[>] In Progress` to `[x] Completed`.
+   - **Single-Phase Mode Handoff:**
+     - If next phase/sub-phase (`[ ] Pending`) exists:
+       - **Cross-Phase Drift Check:** verify that its prerequisites, target files, and interface contracts still match the actual implementation (which may have deviated from the original spec). If discrepancies exist, update the next phase spec to reflect reality.
+       - **Automated Next Phase (`[CODE]`, `[DATA]`):** Provide clickable link and ready `/implement <next-phase>` command.
+       - **Next Phase `[QA]` (Milestone / Final Review):** Clearly state the cumulative list of covered phases (e.g., `01`, `02`) and provide ready `/review` command targeting `git diff HEAD` (or `git diff --staged` if manually staged) under clean context.
+       - **Manual Next Phase (`[MANUAL/DEVOPS]`):** Present portal navigation guide, cloud checklist, and output variables, then prompt user to complete manual steps before proceeding to dependent code phases.
+   - **Batch Queue Mode Pipeline Loop (Step-by-Step Simulation):**
+     - After verifying current phase, emit a compact Phase Checkpoint Summary in chat:
+       ```markdown
+       ════════════════════════════════════════════════════════════════
+       ✅ [CHECKPOINT {i}/{N}] Phase {phase_id} Completed: {name}
+       ════════════════════════════════════════════════════════════════
+       - Files: [Modified files with clickable links]
+       - Verification: Build & tests 100% green (quiet mode)
+       - Overview Status: [x] Completed in 00_overview.md
+       ```
+     - **Next Phase Barrier & Transition Guard:**
+       - **Manual / DevOps Barrier:** If the next item in the queue is `[MANUAL/DEVOPS]`:
+         - **HALT queue immediately.**
+         - Output portal navigation checklist, CLI instructions, and required output secrets.
+         - Prompt user: *"Queue paused at Phase {X} due to manual cloud/DevOps prerequisites. Complete steps and resume with `/implement all` (or `/implement <phase>`)."*
+         - Safely end turn.
+       - **Final QA Trigger:** If all automated `[CODE]`/`[DATA]` phases in the queue are completed and the next/final phase is `[QA]`:
+         - Automatically proceed to execute the `[QA]` phase: run cumulative full regression suite, sync affected project documentation (`README.md`, ADRs, API specs), and trigger clean-context `/review`.
+       - **Automated Next Phase Advance (`[CODE]`, `[DATA]`):**
+         - Perform **Cross-Phase Drift Check** on next phase spec.
+         - Advance directly to the next phase in the queue without waiting for user input, announcing:
+           ```markdown
+           ════════════════════════════════════════════════════════════════
+           🚀 [QUEUE STEP {i+1}/{N}] Advancing to Phase: {next_phase_id}_{name}.md
+           ════════════════════════════════════════════════════════════════
+           ```
+         - Re-enter Steps 1.3 -> 2 -> 3 for the next phase.
    - *Standalone tasks:* Mark completed items in `task.md` or present a clean walkthrough summary.
 4. **User Summary:** Concise summary in user's conversational language (**Rule A**).
 5. **Context Hygiene Gate:** If 5+ phases/sub-phases have been completed and verified in the current session, proactively suggest `/checkpoint` to preserve progress before context degradation impacts quality.
@@ -115,4 +161,6 @@ Follow **Rule D (Surgical Edits)**, **Rule E (English Code)**, **Rule F (Verific
 
 ## Circuit Breaker
 - **Progress-Driven Persistence:** Continue iterations as long as measurable progress is made (failing test count steadily decreasing, narrowing defect blast radius).
-- **Stagnation Stop:** If an error, failing test, or defect persists after **3–4 iterations without progress** (flapping tests, circular errors, zero defect reduction), halt immediately. Summarize root blocker, reproduction steps, and attempted fixes, then request user guidance.
+- **Stagnation Stop & Queue Halt:** If an error, failing test, or defect persists after **3–4 iterations without progress** (flapping tests, circular errors, zero defect reduction):
+  - In Single Mode: halt immediately, summarize root blocker, reproduction steps, attempted fixes, and request user guidance.
+  - In Batch Queue Mode: **HALT the entire queue immediately**. Do not attempt subsequent phases. Report RCA, failing test output, and exact defect location, then request user guidance.
