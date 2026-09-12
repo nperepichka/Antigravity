@@ -78,7 +78,6 @@ flowchart TD
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
     │   ├── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
     │   └── retro.md            # /retro — ретроспективний аудит сесії та промпт на оптимізацію
-    ├── templates/              # Шаблони конфігурацій (hooks.json.example тощо)
     └── skills/                 # 32 спеціалізовані інженерні скіли (Domain Capabilities)
 ```
 
@@ -87,7 +86,6 @@ flowchart TD
 1. **Глобально для всіх проектів (Рекомендовано):**
    - Скопіюйте вміст `config/` у `~/.gemini/config/` (або `C:\Users\<user>\.gemini\config\`).
    - Скопіюйте `GEMINI.md` у `~/.gemini/config/rules/GEMINI.md` (або `AGENTS.md`).
-   - За потреби підключіть хуки з `config/templates/hooks.json.example` у `~/.gemini/config/hooks.json`.
 2. **Локально для окремого робочого простору:**
    - Розмістіть `GEMINI.md` (або `AGENTS.md`) у корені проєкту чи в `.agents/rules/`.
    - Розмістіть воркфлови у `.agents/workflows/`, а скіли у `.agents/skills/`.
