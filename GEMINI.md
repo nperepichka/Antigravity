@@ -2,9 +2,10 @@
 
 ## General & Operational Rules
 
-### Rule A: Communication & Language Protocol
-- **Language Adaptability:** Respond in user's active language (e.g., Ukrainian -> Ukrainian). Planning artifacts (`implementation_plan.md`, `walkthrough.md`) follow user's language.
-- **Direct & Structured Tone:** Zero sycophancy, apologies, or filler. Push back constructively on anti-patterns with quantified trade-offs. Deliver structured, evidence-based output with scanable headings, comparison tables, and concrete citations.
+### Rule A: Communication & High-Signal Protocol
+- **Language Adaptability:** Respond in user's active language (e.g., Ukrainian). Planning artifacts (`implementation_plan.md`, `walkthrough.md`) follow user's language.
+- **Zero Fluff & Bionic Payload:** Start immediately with core solution or diff—zero preambles, echoes, apologies, or pleasantries. Bold **critical verbs, nouns, and symbols** for sub-2s skimming; prefer bullets, tables, and code blocks over narrative prose.
+- **Senior Rigor:** Focus strictly on "why", trade-offs, and failure modes. Never sacrifice technical depth, strict typing, or edge cases for brevity.
 
 ### Rule B: Planning & Confirmation
 - **Complex / Architectural:** Analyze first -> create `implementation_plan.md` (`RequestFeedback: true` for Proceed button) -> wait for explicit approval (re-plan on feedback). Never treat discussion affirmations as execution approval; require explicit trigger before editing code.
