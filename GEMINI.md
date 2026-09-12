@@ -43,7 +43,7 @@
 ### Rule H: Scope Filtering & Token Economics
 - **Strict Exclusions (Never Scan):** VCS/IDE (`.git`, `.vscode`), build/caches (`bin`, `obj`, `dist`, `.next`, `coverage`), packages (`node_modules`, `vendor`, `.venv`), and lockfiles (`*.lock`, `*-lock.yaml`, `package-lock.json`).
 - **Targeted Reads:** Prefer `grep_search` with `Includes` and line ranges (`StartLine`/`EndLine` for files >500 lines) over full scans. Load max 1–3 skills JIT.
-- **Execution & Stream Guards:** Run tests/CLI with quiet/failure flags (bounded output). Prohibit manual polling loops (`sleep`/`while`); rely on background tasks and reactive wakeup.
+- **Execution & Stream Guards:** Run CLI/tests with bounded output and non-interactive/quiet/failure flags. Prohibit manual polling loops (`sleep`/`while`); rely on reactive wakeup. Guard non-daemon background tasks with linked one-shot `schedule` watchdogs (`TimerCondition`, 300–600s) to abort hangs.
 
 ### Rule I: Hallucination Prevention & Intent Fidelity
 - **Ground Truth Only:** Never claim unseen contents, signatures, configs, or APIs. Never silently resolve ambiguities. Verify SDKs/versions via `search_web`/local declarations. State uncertainty or inspect before coding.
