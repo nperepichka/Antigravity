@@ -78,7 +78,7 @@ flowchart TD
     │   ├── describe.md         # /describe — лаконічний опис PR (.local/pr_description.md)
     │   ├── checkpoint.md       # /checkpoint — збереження та відновлення контексту між сесіями
     │   └── retro.md            # /retro — ретроспективний аудит сесії та промпт на оптимізацію
-    └── skills/                 # 32 спеціалізовані інженерні скіли (Domain Capabilities)
+    └── skills/                 # 34 спеціалізовані інженерні скіли (Domain Capabilities)
 ```
 
 ### Як підключити:
@@ -141,16 +141,26 @@ flowchart TD
 **Файл:** `config/global_workflows/investigate.md`
 - Глибокий аналіз задач, архітектури (HLD/ADR/PDF) без модифікації робочого коду (**Read-Only**).
 - **Mandatory Dialectical Synthesis:** порівняльний аналіз підходів за схемою `[DRAFT] -> [CRITIQUE] -> [ARBITRATION] -> [SYNTHESIS]` з оцінкою на 100% повноту вимог, захист від оверінжинірингу (KISS/YAGNI), відхиленням зайвих ускладнень та гібридним синтезом.
-- Автоматичний підбір потрібних скілів під стек проєкту та планування проміжних QA-гейтів.
-- Генерує майстер-план `.local/tasks/**/00_overview.md` та фазові специфікації `01_<name>.md` із вбудованими `Tactical Invariants & Failure-Mode Guard`, підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]` (з повною регресією, аудитом/оновленням документації та `/review`).
+- **Дисципліна завершеності (unlazy integration):**
+  - **Reasoning Tiers (`judgment` vs `mechanical`):** оптимізація глибини міркувань та токенів відповідно до складності інваріантів.
+  - **File Ownership Boundaries (`OWNS:`):** декларація точних glob-меж володіння файлами для запобігання гонок та міжфазових конфліктів.
+  - **Requirements Traceability Inventory:** суцільний трекінг вимог (`C1`, `C2`...) у `00_overview.md` для запобігання втраті вимог.
+  - **Machine-Checkable Acceptance Gates (Runnable Oracles):** детерміновані оракули (`CHECK:` + `EXPECT:`) у DoD фазових спек із захистом від тавтологічних тестів (*Honest Oracles Guard*).
+- Генерує майстер-план `.local/tasks/**/00_overview.md` та покроково фазові специфікації `01_<name>.md` через 10-секундний реактивний таймер (*Decoupled Spec Generation*) для збереження максимальної глибини кожної фази, із вбудованими `Tactical Invariants & Failure-Mode Guard`, підтримкою рекурсивної декомпозиції на атомарні підфази (`01a`, `01b`) та обов'язкового фінального `[QA]` (з повною регресією, кумулятивною реверифікацією оракулів, аудитом/оновленням документації та `/review`).
 
 ### 3. `/implement` (Автономна розробка та перевірка)
 **Файл:** `config/global_workflows/implement.md`
 - **Гнучкі режими запуску (Single vs. Batch Queue):**
   - **Single Mode:** `/implement <phase>` (виконання конкретної фази або прямої задачі).
-  - **Batch Queue Mode:** запуск усієї черги або діапазону за одну команду (`/implement all`, `/implement всі`, `/implement все`, `/implement queue`, `/implement 01..04`). Автономна послідовна симуляція фаз із проміжними чекпоінтами, ізольованою верифікацією та обов'язковим контролем міжфазового дрейфу контрактів (*Cross-Phase Drift Check*).
+  - **Batch Queue Mode:** запуск усієї черги або діапазону за одну команду (`/implement all`, `/implement всі`, `/implement все`, `/implement queue`, `/implement 01..04`). Покрокова симуляція фаз із роздільними повідомленнями-ходами через 30-секундний реактивний таймер (`schedule` watchdog), можливістю миттєвої паузи/інспекції користувачем, ізольованою верифікацією та обов'язковим контролем міжфазового дрейфу контрактів (*Cross-Phase Drift Check*).
 - **Pre-Coding Dialectical Audit:** обов'язковий стрес-тест нетривіальних задач перед написанням коду (`[DRAFT]` -> `[CRITIQUE]` за 5 інженерними лінзами -> `[ARBITRATION]` із відсіканням оверінжинірингу -> `[SYNTHESIS]`).
-- Двофазний цикл: **Phase I** (компіляція, точкові тести в quiet-режимі, візуальна верифікація) + **Phase II** (стратегічний аудит, Bidirectional Diff Reconciliation та чистота за SOLID).
+- **4-Pass Anti-Laziness Engineering Cycle:**
+  - *Pass 1 (Complete Deliverable):* 100% реалізація без заглушок `TODO` чи mock-повернень у робочому коді.
+  - *Pass 2 (Senior Re-read & Anti-Cheapening):* ліквідація наївних/неефективних рішень та покращення захисності.
+  - *Pass 3 (Defect & Boundary Hunt):* стрес-тести меж, конкурентності, тайм-аутів (`CancellationToken`) та витоків.
+  - *Pass 4 (Low-Cost Polish & Oracle Sealing):* виконання та фіксація машинних воріт (`CHECK:` + `EXPECT:`).
+- **Кумулятивна реверифікація оракулів:** у Milestone та Final `[QA]` обов'язковий прогін усіх оракулів попередніх фаз для гарантії нульового регресу.
+- **Pre-Report Audit Gate:** перерахунок усіх метрик безпосередньо з терміналу перед складанням звіту; протокол `[ABANDONED]` при блокерах.
 - **Запобіжники черги (Guardrails):** автоматична пауза перед кроками `[MANUAL/DEVOPS]` з показом хмарного чеклисту та аварійна зупинка всієї черги (*Stagnation Circuit Breaker*) при відсутності прогресу за 3 ітерації.
 - **Unstaged Working Tree Delivery:** перевірені зміни завжди передаються нестейдженими в робочому дереві (`git diff HEAD`) для особистого аудиту та ручного стейджингу користувачем.
 
@@ -161,7 +171,7 @@ flowchart TD
 
 ### 5. `/review` (Аудит коду та статична верифікація)
 **Файл:** `config/global_workflows/review.md`
-- Строге **read-only** рев'ю за протоколом *Static Flow Verification & Bidirectional Reconciliation*.
+- Строге **read-only** рев'ю за протоколом *Static Flow Verification & Bidirectional Reconciliation* (нуль змін коду агентом — виключно винесення вердикту `APPROVED` / `CHANGES REQUIRED` та надання точних diff-рекомендацій).
 - Двостороння перевірка diff (100% покриття вимог і 0% незапитаного коду), OWASP-безпека, Blast Radius аудит та перевірка синхронізації/актуальності документації (`README.md`, API спеки, ADR, конфіги).
 - **Bifurcated Delivery:** для незакомічених змін робочого простору (`git diff HEAD`, `git diff --staged`) видає повний звіт безпосередньо в чат мовою користувача без створення файлів на диску; для закомічених гілок/PR (`git diff main...feature`, commit ranges) додатково генерує офіційний англомовний звіт у `.local/review_report.md`.
 
@@ -199,8 +209,9 @@ flowchart TD
 | Категорія | Включені скіли | Призначення |
 | :--- | :--- | :--- |
 | **🏛️ Архітектура & Дизайн** | `architecture`, `architecture-decision-records`, `backend-architect`, `api-design-principles`, `api-security-best-practices`, `database-design`, `brainstorming`, `domain-modeling`, `grill-me` | Проєктування систем, REST/GraphQL контрактів, ADR, безпека API, схем БД, доменне моделювання та стрес-тестування рішень |
+| **🎨 UI/UX & Візуальний дизайн** | `design-taste` | 100% Pure Modern Vanilla CSS дизайн-системи, anti-slop правила, асиметричний Bento Grid, апаратні double-bezel картки, універсальна стилізація (Web, PDF, слайди, email) та арт-дирекція для `generate_image` |
 | **🤖 AI & Агенти** | `ai-agents-architect`, `rag-engineer`, `prompt-engineering` | Розробка автономних агентів, Hybrid RAG & GraphRAG (Knowledge Graphs), оптимізація промптів та пам'яті |
-| **💻 Мови & Фреймворки** | `csharp-pro`, `javascript-pro`, `python-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, React, Angular та Node.js |
+| **💻 Мови & Фреймворки** | `csharp-pro`, `javascript-pro`, `python-pro`, `golang-pro`, `react-best-practices`, `angular-best-practices`, `nodejs-best-practices` | Глибока експертиза в .NET/C#, TS/JS, Python, Go, React, Angular та Node.js |
 | **☁️ Хмара & Serverless** | `aws-skills`, `aws-serverless`, `azure-functions` | Архітектура та автоматизація в AWS (Lambda, CDK) та Azure Functions |
 | **🧪 Якість & Рефакторинг** | `clean-code`, `testing-patterns` | Принципи Clean Code, TDD та патерни тестування |
 | **🌐 RPA & Зворотний інжиніринг** | `mine-recording`, `rpa-capture`, `browser-to-api` | 100% локальний аналіз відеодемонстрацій (FFmpeg + Whisper), сесій у Chrome (CDP) та виведення OpenAPI 3.1 специфікацій і SDK з HTTP/HAR трафіку |

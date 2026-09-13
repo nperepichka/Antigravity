@@ -1,7 +1,7 @@
 # Repository Meta-Context: Antigravity Config Master
 
 ## System Identity & Domain
-This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 32 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
+This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 34 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
 
 ## Architecture & Tech Stack
 - **Pattern:** Modular declarative configuration — Markdown prompt engineering with YAML frontmatter, starter templates, and helper scripts.
@@ -12,6 +12,8 @@ This workspace is the local staging and working copy for the user's global Googl
 - **Read-Only Discovery Loops:** `/context`, `/investigate`, `/explain`, `/review`, and `/retro` workflows are strictly read-only — zero code modifications or package operations.
 - **Solution Integrity (Rule J):** Address root causes directly in contracts and domain models; never add symptom-masking conditionals or stack patches on broken foundations.
 - **Dual-Language Invariant (Rule A + E):** User interactions and markdown artifacts adhere to the user's active language; rule definitions, workflows, and code identifiers remain strictly in English.
+- **Pure Vanilla CSS Standard (Rule D):** All UI components and visual assets must use 100% Pure Modern Vanilla CSS custom properties.
+- **Dynamic Workflow Resolution:** Decoupled background timers and reactive wakeups must resolve workflow paths dynamically via `<workflows>` in system instructions, ensuring portability across arbitrary workspaces.
 - **Lazy JIT Skill Loading (Rule H):** Domain skills load on-demand (max 1–3) only when squarely matching specialized tasks; no speculative meta-skill loading.
 - **Unstaged Working Tree Delivery (Rule C):** Verified changes MUST remain unstaged in the working tree for user inspection; never run `git add` automatically.
 

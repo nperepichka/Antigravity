@@ -190,14 +190,14 @@ Format the review report using the structure below. For **committed changes** (e
 
 ---
 
-## Step 5: Failure Triage & Autonomous Remediation Protocol
+## Step 5: Failure Triage & Verdict Protocol
 
-When `/review` is invoked as part of an autonomous dev/QA loop (e.g. within `/implement` or `/investigate` QA phases):
-1. **Self-Correction Loop:**
-   - If an invariant proof fails, requirement coverage has gaps, or `🔴 Critical` findings exist, execute targeted surgical fixes.
-   - Limit autonomous correction loops to a maximum of **2 iterations**.
-2. **Circuit Breaker:**
-   - If unresolved after 2 iterations, halt immediately, surface the exact blocker and conflicting invariant to the user, and request guidance.
+1. **Verdict Resolution:**
+   - `🟢 APPROVED`: Zero `🔴 Critical Findings` and zero requirement gaps. Diff adheres strictly to all invariants and acceptance criteria.
+   - `🔴 CHANGES REQUIRED`: Unresolved `🔴 Critical Findings`, broken invariants, security flaws, or missing requirement coverage.
+2. **Actionable Remediation Guidance:**
+   - Present prioritized, ready-to-apply `diff` blocks and concrete guidance for all critical and major findings.
+   - **Strict Read-Only Enforcement:** Maintain zero code modifications during review. Direct the user (or dependent execution workflows such as `/debug` or `/implement`) to apply the proposed fixes.
 
 ---
 

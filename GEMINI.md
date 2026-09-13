@@ -22,11 +22,13 @@
 
 ### Rule D: Production-Ready Engineering & Surgical Edits
 - **Senior Quality & Strict Typing:** SOLID, defensive error handling, no deprecated APIs, zero duplication. TS `strict: true`, C# nullable refs, Python type hints.
+- **Zero Placeholders & Anti-Laziness:** ZERO placeholders (`TODO`, stubs, mock returns, `NotImplementedException`) or hardcoded test hacks. Deliver complete production-grade logic on all paths.
 - **Surgical Edits & Scope Preservation:** Touch only strictly targeted lines. No unsolicited rewrites, formatting sweeps, or unprompted alterations/removals of adjacent controls, contracts, or behaviors. Preserve conventions and comments.
 - **Guardrail Preservation:** NEVER drop or dilute safety boundaries, negative constraints ("read-only"), or operational guardrails.
 - **Dynamic Entity Resolution:** Never hardcode static entity lists (tenants, models, routes); rely on registries/catalogs. Demarcate examples as illustrative.
 - **Integrity & Sync:** Verify DB migrations, backward compatibility, and sync sample configs (`.env.example`) when adding env vars.
 - **Harness & Doc Precision:** Test runners remain domain-agnostic; mocks belong in `*.test.ts`. Never label external/cloud services as "native".
+- **UI & Visual Design Standards:** Avoid generic AI defaults (no purple button glows, em-dashes '—' in UI copy, or broken WCAG contrast); activate the `design-taste` skill for anti-slop frontend engineering and image generation art direction.
 
 ### Rule E: Technical Language Consistency
 - **Technical Artifacts & Source Code:** Source code, code identifiers, comments, commits, PR descriptions, and specs MUST be in English.
@@ -35,6 +37,7 @@
 ### Rule F: Proactive Reviewer Mindset & Verification
 - **Proactive Solving:** Identify edge cases, concurrency hazards, bottlenecks, and regressions upfront.
 - **Pre-Completion Validation:** (1) Clean build/syntax check. (2) Run tests/linters; write unit tests for new public APIs/branches if suite exists. (3) Verify guardrails, zero hardcoded entities, backward compatibility.
+- **Honest Oracles & Empirical Remeasurement:** Verification commands/assertions MUST be capable of failing; no fixed outputs (`echo ok`) or tautologies; negative checks require positive controls. Measure metrics directly from terminal output, never assumed.
 - **Deterministic Tests:** Never assert ambient env vars (`process.env`); isolate/mock in test hooks.
 - **Circuit Breaker:** Halt after 3–4 stagnant iterations without progress, report root blocker, and request guidance.
 
@@ -53,3 +56,4 @@
 ### Rule J: Solution Integrity & Anti-Masking
 - **Root Cause First:** Fix underlying models/logic; never add special-case conditionals to mask bugs.
 - **Revert Over Stack:** Cleanly self-revert flawed abstractions instead of stacking corrective patches.
+- **Visible Handoff:** Never silently drop or falsely complete blocked items. Record explicit `[ABANDONED] <id>: <rationale>` and report `HANDOFF REQUIRED`.

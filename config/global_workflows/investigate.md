@@ -20,6 +20,7 @@ Exploratory analysis of complex tasks, architecture designs (HLD/ADR/PDF), or pr
 1. **Ingest Requirements:** Parse prompts, task files (`task.md`, `specs/*.md`, `ADR.md`), **PDF documents** (architectural designs, topologies, wireframes), meeting transcripts, client briefs, or RFP sections.
 2. **Project State:** Classify as **Greenfield** (new setup, scaffolding, infra) or **Brownfield** (existing project, impact & compatibility analysis).
 3. **Directory Target:** Create `.local/tasks/<YYYY-MM-DD>_<task-slug>/` at project root.
+4. **Execution & Generation Mode:** Defaults to a 10-second decoupled turn boundary between generating each phase specification file (`schedule` watchdog); --immediate / --no-delay (or conversational: "without delay", "no delay", "immediately") overrides to instant generation in a single turn.
 
 ---
 
@@ -75,12 +76,20 @@ Quantify requirements and evaluate steelmanned architectural options before DAG 
 ### Step 4: Phase Classification & DAG Decomposition
 Decompose the task into cohesive phases. Act situationally: for massive tasks, group related features into larger logical phases. For smaller tasks or when breaking down a specific phase, aim for **hyper-granular, atomic sub-phases** (e.g., one sub-phase = one logical PR, such as DB models only, or a single API endpoint).
 
-1. **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
-2. **`[MANUAL/DEVOPS]` (Cloud/Infra):** Cloud provisioning, portal config, OAuth/IdP app registration, DNS/SSL, secret vaults (Key Vault, Secrets Manager), webhooks.
-3. **`[DATA]` (Data Migrations):** Idempotent transformations/backfills (`IF NOT EXISTS`, transactional) with rollback scripts and validation queries.
-4. **`[QA]` (E2E Verification, Documentation Sync, Clean-Context Subagents & `/review`):**
-   - Integration/E2E test suites, performance benchmarks, and security checks.
-   - **Documentation Audit & Sync Gate:** In the final `[QA]` phase, explicitly plan verification and updating of existing project documentation (`README.md`, architecture docs, ADRs, API specs/OpenAPI schemas, deployment/setup guides, `.env.example` references) whenever documentation exists and is affected by the changes across implemented phases.
+1. **Phase Categorization & Isolation:**
+   - **`[CODE]` (Automated Dev):** Domain models, migrations, business logic, APIs, tests, UI.
+   - **`[MANUAL/DEVOPS]` (Cloud/Infra):** Cloud provisioning, portal config, OAuth/IdP app registration, DNS/SSL, secret vaults (Key Vault, Secrets Manager), webhooks.
+   - **`[DATA]` (Data Migrations):** Idempotent transformations/backfills (`IF NOT EXISTS`, transactional) with rollback scripts and validation queries.
+   - **`[QA]` (E2E Verification, Documentation Sync, Clean-Context Subagents & `/review`):** Integration/E2E test suites, performance benchmarks, and security checks.
+2. **Reasoning Tier Assignment (`judgment` vs `mechanical`):**
+   - Classify each phase to guide token budgeting and verification depth in `/implement`:
+     - **`judgment`:** Architecture decisions, complex domain invariants, concurrency, security, non-trivial API contracts, or high-risk business logic. Enforces full dialectical stress-testing.
+     - **`mechanical`:** Predictable patterns, boilerplate DTOs, standard CRUD mappings, routine migrations, or established test fixtures. Optimizes for rapid, compact verification.
+3. **Explicit File Ownership Boundaries (`OWNS:`):**
+   - Each phase must declare exact repository-relative glob patterns it has primary write authority over (e.g., `OWNS: src/domain/**, tests/domain/**`).
+   - For batch queue or parallel subagent runs, verify that concurrent/sequential phases maintain disjoint primary ownership to eliminate race conditions and scope creep, while permitting surgical cross-module caller sync to keep global builds green.
+4. **`[QA]` Verification, Documentation Sync & Review Gates:**
+   - **Documentation Audit & Sync Gate:** In the final `[QA]` phase, explicitly plan verification and updating of existing project documentation (`README.md`, architecture docs/ADRs, API specs/OpenAPI schemas, deployment/setup guides, `.env.example` references) whenever documentation exists and is affected by the changes across implemented phases.
    - **Clean Context & Subagent Gate:** Execute QA and code review with an isolated, fresh context (delegating to a clean subagent or running in a clean session) to eliminate implementation anchoring bias and self-verification blind spots.
    - **Multi-Phase & Cumulative Scope:** Milestone QA and Final QA audit uncommitted modifications (`git diff HEAD`), staged code if manually staged by the user (`git diff --staged`), or the cumulative branch diff (`git diff <base>`), reconciling all covered phase specifications simultaneously.
    - **Mandatory `/review` Integration:** Audit feature diff with `/review`. Triage `🔴 Must Fix` / `🟡 Should Fix` with surgical patches until `🟢 APPROVED`.
@@ -95,33 +104,83 @@ Decompose the task into cohesive phases. Act situationally: for massive tasks, g
 
 ### Step 5: Specification File Generation
 
-#### 5.1 Master Plan (`00_overview.md`)
-- **System Architecture & Context:** Solution summary + Mermaid diagrams.
-- **Steelmanned Architecture Options & Synthesis:**
-  - Table of considered steelmanned approaches (Options A/B/C) evaluated across the 6 mandatory criteria.
-  - Layer-by-layer architectural decision mapping (Data/Concurrency, Domain Logic, Resiliency, API Contracts).
-  - Detailed rationale for the synthesized target architecture and why specific trade-offs were chosen or rejected.
-- **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
-- **Execution Matrix (DAG & Shared Map):**
-  - **Visual Dependency Graph:** Mandatory Mermaid diagram (`graph TD` or `flowchart TD`) showing phase nodes and directed dependency edges (clearly identifying parallel tracks vs. blocking bottlenecks).
-  - **Execution Table:** Table (Phase ID, Name, Type, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`). For massive projects, demarcate the "Frontier" (live phase files) from the "Fog of War" (unspecified future phases).
-- **Out of Scope:** Explicitly list work ruled out of this effort to bound the fog of war.
-- **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
-- **Shared Data Contracts:** DTO schemas, interfaces, event payloads.
-- **Documentation Impact Matrix:** Explicit checklist of project documentation (`README.md`, OpenAPI/API specs, ADRs, configuration templates, runbooks) targeted for synchronization during the final QA phase.
+#### 5.1 Master Plan Generation (`00_overview.md`)
+- Generate `.local/tasks/<YYYY-MM-DD>_<task-slug>/00_overview.md` containing:
+  - **System Architecture & Context:** Solution summary + Mermaid diagrams.
+  - **Steelmanned Architecture Options & Synthesis:**
+    - Table of considered steelmanned approaches (Options A/B/C) evaluated across the 6 mandatory criteria.
+    - Layer-by-layer architectural decision mapping (Data/Concurrency, Domain Logic, Resiliency, API Contracts).
+    - Detailed rationale for the synthesized target architecture and why specific trade-offs were chosen or rejected.
+  - **Recommended Agent Skills:** Table (Name, Category, Repo URL, Scope [Workspace vs Global], Justification).
+  - **Requirements & Constraints Traceability Inventory:**
+    - Explicit contract table mapping all functional requirements, NFRs, and architectural invariants to guarantee zero dropped requirements:
+      `| ID | Requirement / Invariant | Owner Phase | Observing Gate / Oracle | Tier | Status |`
+      (IDs: `C1`, `C2`...; Status: `[ ] Pending`, `[x] Met`, `[!] Abandoned`).
+  - **Execution Matrix (DAG & Shared Map):**
+    - **Visual Dependency Graph:** Mandatory Mermaid diagram (`graph TD` or `flowchart TD`) showing phase nodes and directed dependency edges (clearly identifying parallel tracks vs. blocking bottlenecks).
+    - **Execution Table:** Table (Phase ID, Name, Type, Tier [`judgment`/`mechanical`], OWNS Globs, Dependencies, Complexity, Status: `[ ] Pending`, `[>] In Progress`, `[x] Completed`, `[!] Blocked`). For massive projects, demarcate the "Frontier" (live phase files) from the "Fog of War" (unspecified future phases).
+  - **Out of Scope:** Explicitly list work ruled out of this effort to bound the fog of war.
+  - **Environment & Config Matrix:** Keys, descriptions, types, and placeholder values for Local/Staging/Prod.
+  - **Shared Data Contracts:** DTO schemas, interfaces, event payloads.
+  - **Documentation Impact Matrix:** Explicit checklist of project documentation (`README.md`, OpenAPI/API specs, ADRs, configuration templates, runbooks) targeted for synchronization during the final QA phase.
+- Output Master Plan Completion Summary in chat:
+  ```markdown
+  ### 📋 [INVESTIGATE MASTER PLAN] Created 00_overview.md
+  - Path: [00_overview.md](file:///path/to/00_overview.md)
+  - Frontier Phases: N phase specification(s) queued for generation.
+  ```
 
-#### 5.2 Phase Files (`01_<name>.md`, `02_<name>.md`, ...)
-Use the corresponding structured template (all in **English**):
-
-- **Template A `[CODE]`:** Objective & Scope (`Goal` / `In Scope` / `Out of Scope`) -> Prerequisites & Dependencies -> Target Files & Symbols (`[NEW/MODIFY/DELETE]`) -> Context & Interface Snippets -> Tactical Invariants & Failure-Mode Guard (pre-arbitrated atomicity, concurrency, memory footprint, and explicit anti-overengineering constraints) -> Implementation Instructions -> Definition of Done (build/test commands + checklist).
+#### 5.2 Sequential Phase Spec Generation Loop (Decoupled 10s Reactive Timer)
+Generate individual phase files for all identified Frontier phases in sequential order using the appropriate template:
+- **Template A `[CODE]`:**
+  - `Objective & Scope` (`Goal` / `In Scope` / `Out of Scope`)
+  - **`OWNS: <repository-relative globs, e.g. src/auth/**, tests/auth/**>`**
+  - `Prerequisites & Dependencies` -> `Target Files & Symbols` (`[NEW/MODIFY/DELETE]`)
+  - `Context & Interface Snippets`
+  - `Tactical Invariants & Failure-Mode Guard` (atomicity, concurrency, memory footprint, anti-overengineering)
+  - `Implementation Instructions`
+  - **Definition of Done (Two-Tier Verification Gates):**
+    - **Tier 1: Machine-Checkable Acceptance Gates (Runnable Oracles):**
+      Deterministic commands that decide completion objectively.
+      ```markdown
+      - [ ] G1: <Observable outcome description>
+        CHECK: <exact command, e.g. dotnet test --filter FullyQualifiedName~AuthTests>
+        EXPECT: <decisive success token, e.g. Passed: 5, Failed: 0>
+      ```
+    - **Honest Oracles Guard:** Command must be capable of failing; fixed-output emitters (`echo ok`) are forbidden. Negative checks (verifying absence of a defect) MUST specify a verified positive control.
+    - **Tier 2: Manual Verification Gates:** Non-automated checks (visual polish, external approval) with exact artifact and risk rating.
+    - **Terminal Handoff Protocol:** If a gate becomes impossible within scope, it must be marked `ABANDON: <id> <concrete rationale>` and treated as `HANDOFF REQUIRED` rather than silently checked or deleted.
 - **Template B `[MANUAL/DEVOPS]`:** Objective & Overview -> Step-by-Step Portal Navigation Guide -> Alternative CLI/IaC Commands -> Secrets & Output Variables Checklist -> Verification & Connectivity Test.
 - **Template C `[DATA]`:** Objective & Scope -> Prerequisites -> Idempotent Migration Script (with rollback & transactions) -> Validation Queries -> Definition of Done.
-- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff HEAD` / `git diff --staged` if staged / `git diff <base>`) -> Test Environment Setup -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Documentation Audit & Sync (verify & update `README.md`, ADRs, API schemas, guides if applicable) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
+- **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff HEAD` / `git diff --staged` if staged / `git diff <base>`) -> Test Environment Setup -> Cumulative Oracle Re-verification (re-running all previous phase runnable gates) -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Documentation Audit & Sync (verify & update `README.md`, ADRs, API schemas, guides if applicable) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
+
+- **Generation Protocol (Decoupled Turn Boundary):**
+  - **Immediate Mode Override:** If explicitly invoked with `--immediate`, `--no-delay`, or conversational equivalent in active language (e.g., "without delay", "no delay", "immediately"): generate all phase files sequentially within the same turn.
+  - **Default: 10s Decoupled Turn Boundary (Reactive Timer):**
+    - After generating `00_overview.md` (or completing phase spec `{i-1}`), if pending phase `{i}` exists:
+      1. Emit Countdown Banner in chat:
+         ```markdown
+         ⏳ [SPEC GENERATION: 10s] Advancing to generate {phase_id}_{name}.md in 10 seconds...
+         - Run immediately: `/investigate {phase_id}_{name}.md` (or "generate now", "no delay")
+         - Type any prompt to pause/adjust, or wait for automated generation.
+         ```
+      2. Schedule one-shot 10-second watchdog timer:
+         `schedule(DurationSeconds="10", Prompt="[INVESTIGATE SPEC {i}/{N}] /investigate: Generate detailed phase specification file: {phase_id}_{name}.md for task <task-slug>. View workflow /investigate file (see path in <workflows>) Step 5.2 Template and DoD Gates.", TimerCondition="any")`
+      3. **MANDATORY TURN END:** Cease tool calling immediately and conclude turn. This flushes the current spec output to the chat UI and guarantees a fresh, unconstrained token budget for the next phase specification.
+    - **Reactive Turn Wakeup (On Timer Expiry or User Prompt):**
+      - The timer notification wakes up the agent in a **fresh, independent assistant turn**. The agent immediately views the `/investigate` workflow file (resolving its path from `<workflows>` in system instructions, or local workspace copy if present) Step 5.2 to generate `{phase_id}_{name}.md` thoroughly according to its declared template (Template A/B/C/D) and Two-Tier Verification Gates under full Auto-Verify discipline.
+      - Announce spec file completion:
+        ```markdown
+        ### ✅ [SPEC GENERATED {i}/{N}] Phase specification created: {phase_id}_{name}.md
+        - Path: [{phase_id}_{name}.md](file:///path/to/{phase_id}_{name}.md)
+        ```
+      - If more Frontier phases remain, trigger the 10s countdown timer for phase `{i+1}` and end turn.
+      - If all Frontier phases are generated, proceed directly to Step 6: Review & Delivery.
 
 ---
 
 ### Step 6: Review & Delivery
 1. All generated specifications MUST be in **English** (**Rule E**).
 2. Summarize findings, skill recommendations, and phase structure in user's language (**Rule A**).
-3. Provide clickable markdown links to `00_overview.md` and phase files.
+3. Provide clickable markdown links to `00_overview.md` and phase files, along with ready `/implement all` (or `/implement <first_phase>`) command.
 4. Highlight trade-offs, open questions, skill install requests (**Rule C** confirmation), and manual prerequisites. Use the native `ask_question` tool whenever user choice between discrete paths is required.
