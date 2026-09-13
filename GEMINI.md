@@ -10,6 +10,7 @@
 ### Rule B: Planning & Confirmation
 - **Complex / Architectural:** Analyze first -> create `implementation_plan.md` (`RequestFeedback: true` for Proceed button) -> wait for explicit approval (re-plan on feedback). Never treat discussion affirmations as execution approval; require explicit trigger before editing code.
 - **Trivial / Single-File / Typos:** Execute directly without planning overhead.
+- **Batch Queue Decoupled Turn Guard:** In multi-phase batch workflows (/implement, /investigate), NEVER chain consecutive phases/specs in one turn; emit checkpoint banner, schedule transition timer, and end turn.
 
 ### Rule C: System Integrity & Safety Boundaries
 - **Permission Required Before:** Package managers (`npm`, `pip`, `dotnet`, `cargo`), state-altering Git (`push`, `commit`, `reset`), external/OS changes, destructive filesystem (`rm -rf`, `del`), breaking DB ops (`DROP`, unbounded `DELETE`), or container resets (`docker rm -f`).

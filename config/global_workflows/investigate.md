@@ -155,6 +155,10 @@ Generate individual phase files for all identified Frontier phases in sequential
 - **Template D `[QA]`:** Objective & Scope (`Goal` / `Covered Phases: 01, 02..` / `Out of Scope`) -> Target Diff Resolution (`git diff HEAD` / `git diff --staged` if staged / `git diff <base>`) -> Test Environment Setup -> Cumulative Oracle Re-verification (re-running all previous phase runnable gates) -> Lean Validation Scenarios (1–3 focused E2E/seam checks + full unit regression suite) -> Documentation Audit & Sync (verify & update `README.md`, ADRs, API schemas, guides if applicable) -> Independent Verification Gate (`/review` with clean context) -> Triage & Remediation Protocol -> Definition of Done.
 
 - **Generation Protocol (Decoupled Turn Boundary):**
+  - **Hard Spec Barrier & Immediate Stop:**
+    - The moment a phase specification (`{phase_id}_{name}.md`) is written to disk, calling ANY tool other than `schedule` is STRICTLY PROHIBITED.
+    - You MUST emit the Spec Completion Banner (`### ✅ [SPEC GENERATED {i}/{N}] ...`), emit the Countdown Banner, schedule the 10s timer, and CEASE ALL TOOL CALLS immediately to end the turn.
+    - Chaining into the next specification within the same assistant turn without explicit `--immediate` / `--no-delay` flag is a critical protocol deviation.
   - **Immediate Mode Override:** If explicitly invoked with `--immediate`, `--no-delay`, or conversational equivalent in active language (e.g., "without delay", "no delay", "immediately"): generate all phase files sequentially within the same turn.
   - **Default: 10s Decoupled Turn Boundary (Reactive Timer):**
     - After generating `00_overview.md` (or completing phase spec `{i-1}`), if pending phase `{i}` exists:
@@ -174,7 +178,7 @@ Generate individual phase files for all identified Frontier phases in sequential
         ### ✅ [SPEC GENERATED {i}/{N}] Phase specification created: {phase_id}_{name}.md
         - Path: [{phase_id}_{name}.md](file:///path/to/{phase_id}_{name}.md)
         ```
-      - If more Frontier phases remain, trigger the 10s countdown timer for phase `{i+1}` and end turn.
+      - If more Frontier phases remain: emit Countdown Banner, schedule the 10s timer for phase `{i+1}`, and CEASE ALL TOOL CALLS immediately to end turn (**MANDATORY TURN END**).
       - If all Frontier phases are generated, proceed directly to Step 6: Review & Delivery.
 
 ---

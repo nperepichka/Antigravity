@@ -167,6 +167,10 @@ Follow **Rule D (Surgical Edits & Anti-Laziness)**, **Rule E (English Code)**, *
         - Overview Status: [x] Completed in 00_overview.md
         ```
       - **Next Phase Barrier & Transition Guard:**
+        - **Hard Phase Barrier & Immediate Stop:**
+          - The moment a phase's acceptance gates are verified and marked `[x] Completed` in `00_overview.md`, calling ANY tool other than `schedule` (or read-only git status) is STRICTLY PROHIBITED.
+          - You MUST emit the Phase Checkpoint Banner (`### ✅ [CHECKPOINT {i}/{N}] ...`), emit the Queue Countdown Banner, schedule the 30s timer, and CEASE ALL TOOL CALLS immediately to end the turn.
+          - Chaining into the next phase within the same assistant turn without explicit `--immediate` / `--no-delay` flag is a critical protocol deviation.
         - **Manual / DevOps Barrier:** If the next item in the queue is `[MANUAL/DEVOPS]`:
           - **HALT queue immediately.**
           - Output portal navigation checklist, CLI instructions, and required output secrets.
