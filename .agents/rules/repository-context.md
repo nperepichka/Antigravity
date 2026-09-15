@@ -1,11 +1,11 @@
 # Repository Meta-Context: Antigravity Config Master
 
 ## System Identity & Domain
-This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 34 specialized domain skills (`config/skills/`), ecosystem templates (`config/templates/`), and IDE maintenance utilities (`scripts/`).
+This workspace is the local staging and working copy for the user's global Google Antigravity configuration — encompassing global rules (`GEMINI.md` / `AGENTS.md`), 9 lifecycle engineering workflows (`config/global_workflows/`), 34 specialized domain skills (`config/skills/`), and IDE maintenance utilities (`scripts/`).
 
 ## Architecture & Tech Stack
-- **Pattern:** Modular declarative configuration — Markdown prompt engineering with YAML frontmatter, starter templates, and helper scripts.
-- **Module Structure:** `GEMINI.md` / `AGENTS.md` (core rules & guardrails) → `config/global_workflows/` (context, investigate, explain, implement, debug, review, describe, checkpoint, retro) → `config/skills/` (domain capability bundles) → `scripts/` (PowerShell maintenance and multi-profile session automation) → `config/templates/` (lifecycle hooks & configs).
+- **Pattern:** Modular declarative configuration — Markdown prompt engineering with YAML frontmatter and helper scripts.
+- **Module Structure:** `GEMINI.md` / `AGENTS.md` (core rules & guardrails) → `config/global_workflows/` (context, investigate, explain, implement, debug, review, describe, checkpoint, retro) → `config/skills/` (domain capability bundles) → `scripts/` (PowerShell maintenance orchestrators backed by `scripts/lib/` Python VSCDB engine).
 
 ## Non-Obvious Conventions & Guardrails
 - **Tandem Lifecycle Synergy:** All 9 workflows form a unified pipeline; changes to one workflow must preserve interoperability invariants with the others.

@@ -5,3 +5,8 @@
 .DS_Store
 Thumbs.db
 *.tmp
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class

@@ -18,7 +18,7 @@ if ($runningProcs) {
 }
 
 # Normalize BasePath if user passed AppData root without \User
-if (Test-Path -Path (Join-Path $BasePath "User")) {
+if (Test-Path -LiteralPath (Join-Path $BasePath "User")) {
     $BasePath = Join-Path $BasePath "User"
 }
 
@@ -26,7 +26,7 @@ if (Test-Path -Path (Join-Path $BasePath "User")) {
 $targetProfiles = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 function Register-Profile([string]$userDir, [string]$label) {
-    if (-not $userDir -or -not (Test-Path -Path $userDir)) { return }
+    if (-not $userDir -or -not (Test-Path -LiteralPath $userDir)) { return }
     $resolved = [System.IO.Path]::GetFullPath($userDir).TrimEnd('\', '/')
     foreach ($p in $targetProfiles) {
         if ($p.UserDir.Equals($resolved, [System.StringComparison]::OrdinalIgnoreCase)) {
@@ -46,14 +46,14 @@ function Register-Profile([string]$userDir, [string]$label) {
 }
 
 # Register primary profile
-if (Test-Path -Path $BasePath) {
+if (Test-Path -LiteralPath $BasePath) {
     Register-Profile -userDir $BasePath -label "Primary (Antigravity IDE)"
 }
 
 if (-not $SingleProfileOnly) {
     # Check default secondary profile
     $secPath = "$env:APPDATA\Antigravity IDE - Secondary\User"
-    if (Test-Path -Path $secPath) {
+    if (Test-Path -LiteralPath $secPath) {
         Register-Profile -userDir $secPath -label "Secondary (Antigravity IDE - Secondary)"
     }
 
@@ -63,7 +63,7 @@ if (-not $SingleProfileOnly) {
             Where-Object { $_.Name -ne "Antigravity IDE" -and $_.Name -ne "Antigravity IDE - Secondary" }
         foreach ($d in $otherProfileDirs) {
             $uDir = Join-Path $d.FullName "User"
-            if (Test-Path -Path $uDir) {
+            if (Test-Path -LiteralPath $uDir) {
                 Register-Profile -userDir $uDir -label "Profile ($($d.Name))"
             }
         }
@@ -72,7 +72,7 @@ if (-not $SingleProfileOnly) {
     # Register user-supplied profile paths
     foreach ($extraPath in $AdditionalProfilePaths) {
         if ($extraPath) {
-            $resolvedExtra = if (Test-Path (Join-Path $extraPath "User")) { Join-Path $extraPath "User" } else { $extraPath }
+            $resolvedExtra = if (Test-Path -LiteralPath (Join-Path $extraPath "User")) { Join-Path $extraPath "User" } else { $extraPath }
             Register-Profile -userDir $resolvedExtra -label "Custom ($([System.IO.Path]::GetFileName((Split-Path -Path $resolvedExtra -Parent))))"
         }
     }
@@ -89,9 +89,10 @@ foreach ($p in $targetProfiles) {
 }
 
 $BrainDir   = "$env:USERPROFILE\.gemini\antigravity-ide\brain"
+$libDir     = Join-Path $PSScriptRoot "lib"
 $pythonCmd  = Get-Command python -ErrorAction SilentlyContinue | Select-Object -First 1
 
-# --- Helper Functions ---
+# --- Non-exported internal helper functions for path and URI canonicalization ---
 function Normalize-Path([string]$uriString) {
     if (-not $uriString) { return $null }
     try {
@@ -115,7 +116,9 @@ function Normalize-Uri([string]$uriString) {
             $u = [System.Uri]::new("file:///" + $p.Replace('\', '/'))
             return $u.AbsoluteUri
         }
-    } catch {}
+    } catch {
+        Write-Verbose "Could not normalize URI '$uriString': $_"
+    }
     return $uriString.TrimEnd('/')
 }
 
@@ -156,20 +159,22 @@ function Get-OrCreateWorkspaceItem([string]$key, [string]$rawUri, [string]$clean
 
 # --- 1. Scan physical folders in workspaceStorage across target profiles ---
 foreach ($prof in $targetProfiles) {
-    if (Test-Path -Path $prof.WorkspaceStorageDir) {
-        $folders = Get-ChildItem -Path $prof.WorkspaceStorageDir -Directory -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $prof.WorkspaceStorageDir) {
+        $folders = Get-ChildItem -LiteralPath $prof.WorkspaceStorageDir -Directory -ErrorAction SilentlyContinue
         foreach ($folder in $folders) {
             $id = $folder.Name
             $wsJsonPath = Join-Path $folder.FullName "workspace.json"
             $rawUri = $null
             $path = $null
 
-            if (Test-Path -Path $wsJsonPath) {
+            if (Test-Path -LiteralPath $wsJsonPath) {
                 try {
-                    $wsData = Get-Content -Path $wsJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $wsData = Get-Content -LiteralPath $wsJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
                     $rawUri = if ($wsData.folder) { $wsData.folder } else { $wsData.workspace }
                     $path = Normalize-Path $rawUri
-                } catch {}
+                } catch {
+                    Write-Verbose "Failed to read/parse workspace.json at '$wsJsonPath': $_"
+                }
             }
 
             $key = if ($rawUri) { Normalize-Uri $rawUri } else { "$($prof.Name)-untitled-$id" }
@@ -183,9 +188,9 @@ foreach ($prof in $targetProfiles) {
 
 # --- 2. Read globalStorage/storage.json and state.vscdb across target profiles ---
 foreach ($prof in $targetProfiles) {
-    if (Test-Path -Path $prof.GlobalStorageFile) {
+    if (Test-Path -LiteralPath $prof.GlobalStorageFile) {
         try {
-            $storageJson = Get-Content -Path $prof.GlobalStorageFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            $storageJson = Get-Content -LiteralPath $prof.GlobalStorageFile -Raw -Encoding UTF8 | ConvertFrom-Json
 
             # 2.1 Check profileAssociations.workspaces
             if ($storageJson.profileAssociations -and $storageJson.profileAssociations.workspaces) {
@@ -244,75 +249,26 @@ foreach ($prof in $targetProfiles) {
     }
 
     # 2.4 Check Antigravity sidebarWorkspaces in SQLite state.vscdb
-    if ($pythonCmd -and (Test-Path -Path $prof.GlobalVscdbFile)) {
+    if ($pythonCmd -and (Test-Path -LiteralPath $prof.GlobalVscdbFile)) {
         try {
-            $extractScript = @"
-import sqlite3, sys, json
-p = sys.argv[1]
-try:
-    conn = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
-    cur = conn.cursor()
-    cur.execute("SELECT value FROM ItemTable WHERE key='antigravityUnifiedStateSync.sidebarWorkspaces'")
-    row = cur.fetchone()
-    uris = []
-    if row and row[0]:
-        import base64
-        raw = base64.b64decode(row[0])
-        i = 0
-        while i < len(raw):
-            key = 0; shift = 0
-            while True:
-                b = raw[i]; i += 1; key |= (b & 0x7F) << shift; shift += 7
-                if not (b & 0x80): break
-            field_num = key >> 3; wire_type = key & 0x7
-            if wire_type == 0:
-                while True:
-                    b = raw[i]; i += 1
-                    if not (b & 0x80): break
-            elif wire_type == 2:
-                length = 0; shift = 0
-                while True:
-                    b = raw[i]; i += 1; length |= (b & 0x7F) << shift; shift += 7
-                    if not (b & 0x80): break
-                sub = raw[i:i+length]; i += length
-                j = 0
-                while j < len(sub):
-                    k2 = 0; s2 = 0
-                    while True:
-                        b2 = sub[j]; j += 1; k2 |= (b2 & 0x7F) << s2; s2 += 7
-                        if not (b2 & 0x80): break
-                    f2 = k2 >> 3; w2 = k2 & 0x7
-                    if w2 == 0:
-                        while True:
-                            b2 = sub[j]; j += 1
-                            if not (b2 & 0x80): break
-                    elif w2 == 2:
-                        l2 = 0; s2 = 0
-                        while True:
-                            b2 = sub[j]; j += 1; l2 |= (b2 & 0x7F) << s2; s2 += 7
-                            if not (b2 & 0x80): break
-                        val2 = sub[j:j+l2]; j += l2
-                        if f2 == 1:
-                            uris.append(val2.decode('utf-8', errors='ignore'))
-                            break
-    print(json.dumps(uris))
-    conn.close()
-except Exception:
-    print("[]")
-"@
-            $sbJson = $extractScript | & $pythonCmd.Source - $prof.GlobalVscdbFile 2>$null
-            if ($sbJson) {
-                $sbUris = $sbJson | ConvertFrom-Json
-                foreach ($sbUri in $sbUris) {
-                    if ($sbUri) {
-                        $norm = Normalize-Uri $sbUri
-                        $path = Normalize-Path $sbUri
-                        $item = Get-OrCreateWorkspaceItem -key $norm -rawUri $sbUri -cleanPath $path -profileLabel $prof.Name
-                        $item.InJson = $true
+            $vscdbTool = Join-Path $libDir "vscdb_tool.py"
+            if (Test-Path -LiteralPath $vscdbTool) {
+                $sbJson = & $pythonCmd.Source $vscdbTool "extract-workspaces" $prof.GlobalVscdbFile 2>$null
+                if ($sbJson) {
+                    $sbUris = $sbJson | ConvertFrom-Json
+                    foreach ($sbUri in $sbUris) {
+                        if ($sbUri) {
+                            $norm = Normalize-Uri $sbUri
+                            $path = Normalize-Path $sbUri
+                            $item = Get-OrCreateWorkspaceItem -key $norm -rawUri $sbUri -cleanPath $path -profileLabel $prof.Name
+                            $item.InJson = $true
+                        }
                     }
                 }
             }
-        } catch {}
+        } catch {
+            Write-Verbose "Failed to inspect sidebarWorkspaces in state.vscdb: $_"
+        }
     }
 }
 
@@ -659,9 +615,9 @@ foreach ($w in $workspaces.Values) {
 
 # --- 5. Clean globalStorage/storage.json across target profiles ---
 foreach ($prof in $targetProfiles) {
-    if (Test-Path -Path $prof.GlobalStorageFile) {
+    if (Test-Path -LiteralPath $prof.GlobalStorageFile) {
         try {
-            $profStorageJson = Get-Content -Path $prof.GlobalStorageFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            $profStorageJson = Get-Content -LiteralPath $prof.GlobalStorageFile -Raw -Encoding UTF8 | ConvertFrom-Json
             $backupPath = "$($prof.GlobalStorageFile).bak_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
             Copy-Item -Path $prof.GlobalStorageFile -Destination $backupPath -Force
             Write-Host "`n[$($prof.Name)] Created backup of storage.json: $backupPath" -ForegroundColor DarkGray
@@ -788,7 +744,7 @@ foreach ($target in $itemsToDelete) {
 
 # --- 7. Purge session recovery backups (Backups) across target profiles ---
 foreach ($prof in $targetProfiles) {
-    if (Test-Path -Path $prof.BackupsDir) {
+    if (Test-Path -LiteralPath $prof.BackupsDir) {
         foreach ($id in $idsToRemoveSet) {
             if ($id -and $id -notlike "*untitled-*") {
                 $backupSessionFolder = Join-Path $prof.BackupsDir $id
@@ -808,14 +764,14 @@ foreach ($prof in $targetProfiles) {
 # --- 8. Purge editor Local History files associated with workspaces across target profiles ---
 if ($validPathPrefixes.Count -gt 0) {
     foreach ($prof in $targetProfiles) {
-        if (Test-Path -Path $prof.LocalHistoryDir) {
+        if (Test-Path -LiteralPath $prof.LocalHistoryDir) {
             $deletedHistoryCount = 0
-            $historyFolders = Get-ChildItem -Path $prof.LocalHistoryDir -Directory -ErrorAction SilentlyContinue
+            $historyFolders = Get-ChildItem -LiteralPath $prof.LocalHistoryDir -Directory -ErrorAction SilentlyContinue
             foreach ($hFolder in $historyFolders) {
                 $entryJson = Join-Path $hFolder.FullName "entries.json"
-                if (Test-Path -Path $entryJson) {
+                if (Test-Path -LiteralPath $entryJson) {
                     try {
-                        $entryData = Get-Content -Path $entryJson -Raw -Encoding UTF8 | ConvertFrom-Json
+                        $entryData = Get-Content -LiteralPath $entryJson -Raw -Encoding UTF8 | ConvertFrom-Json
                         if ($entryData.resource) {
                             $resourcePath = Normalize-Path $entryData.resource
                             if ($resourcePath) {
@@ -833,7 +789,9 @@ if ($validPathPrefixes.Count -gt 0) {
                                 }
                             }
                         }
-                    } catch {}
+                    } catch {
+                        Write-Verbose "Failed processing local history entry '$($hFolder.FullName)': $_"
+                    }
                 }
             }
             if ($deletedHistoryCount -gt 0) {
@@ -848,11 +806,13 @@ $purgedBrainConvIds = [System.Collections.Generic.HashSet[string]]::new([System.
 $deletedBrainBytes = 0
 $deletedBrainCount = 0
 
-if (Test-Path -Path $BrainDir) {
-    $brainFolders = Get-ChildItem -Path $BrainDir -Directory -ErrorAction SilentlyContinue
+if (Test-Path -LiteralPath $BrainDir) {
+    $brainFolders = Get-ChildItem -LiteralPath $BrainDir -Directory -ErrorAction SilentlyContinue
+    # Skip sessions with recent write activity (< 2 min) to protect active agent conversations
+    $brainRecencyThreshold = (Get-Date).AddMinutes(-2)
     foreach ($bFolder in $brainFolders) {
         $convId = $bFolder.Name
-        if ($env:CONVERSATION_ID -and $convId -eq $env:CONVERSATION_ID) { continue }
+        if ($bFolder.LastWriteTime -gt $brainRecencyThreshold) { continue }
 
         $files = Get-ChildItem -Path $bFolder.FullName -Recurse -File -ErrorAction SilentlyContinue
         $folderSize = ($files | Measure-Object -Property Length -Sum).Sum
@@ -896,7 +856,9 @@ if (Test-Path -Path $BrainDir) {
                             }
                         }
                         if ($matchedPurge) { break }
-                    } catch {}
+                    } catch {
+                        Write-Verbose "Failed reading file '$($f.FullName)': $_"
+                    }
                 }
             }
 
@@ -926,200 +888,28 @@ if (Test-Path -Path $BrainDir) {
 # --- 10. Opportunistic Cleanup of SQLite state.vscdb across target profiles ---
 if ($pythonCmd) {
     try {
-        $pyScript = @"
-import sqlite3, json, sys, base64
+        $vscdbTool = Join-Path $libDir "vscdb_tool.py"
+        if (Test-Path -LiteralPath $vscdbTool) {
+            $payload = @{
+                uris     = @($urisToRemoveSet)
+                conv_ids = @($purgedBrainConvIds)
+            }
+            $payloadB64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json -Compress)))
 
-if len(sys.argv) < 3:
-    sys.exit(0)
+            foreach ($prof in $targetProfiles) {
+                if (Test-Path -LiteralPath $prof.GlobalVscdbFile) {
+                    try {
+                        $vscdbBackup = "$($prof.GlobalVscdbFile).bak_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+                        Copy-Item -LiteralPath $prof.GlobalVscdbFile -Destination $vscdbBackup -Force
 
-db_path = sys.argv[1]
-payload = json.loads(base64.b64decode(sys.argv[2]).decode('utf-8'))
-uris_to_remove = set([u.lower().rstrip('/') for u in payload.get('uris', []) if u])
-for u in list(uris_to_remove):
-    if '%3a' in u:
-        uris_to_remove.add(u.replace('%3a', ':'))
-    if ':' in u and not '%3a' in u:
-        uris_to_remove.add(u.replace(':', '%3a'))
-
-conv_ids_to_remove = set([c.lower() for c in payload.get('conv_ids', []) if c])
-
-if not uris_to_remove and not conv_ids_to_remove:
-    sys.exit(0)
-
-def parse_protobuf(data):
-    i = 0; records = []
-    while i < len(data):
-        key = 0; shift = 0
-        while True:
-            b = data[i]; i += 1
-            key |= (b & 0x7F) << shift; shift += 7
-            if not (b & 0x80): break
-        field_num = key >> 3; wire_type = key & 0x7
-        if wire_type == 0:
-            val = 0; shift = 0
-            while True:
-                b = data[i]; i += 1
-                val |= (b & 0x7F) << shift; shift += 7
-                if not (b & 0x80): break
-            records.append((field_num, wire_type, val))
-        elif wire_type == 2:
-            length = 0; shift = 0
-            while True:
-                b = data[i]; i += 1
-                length |= (b & 0x7F) << shift; shift += 7
-                if not (b & 0x80): break
-            val = data[i:i+length]; i += length
-            records.append((field_num, wire_type, val))
-        else: break
-    return records
-
-def serialize_varint(val):
-    buf = bytearray()
-    while val > 0x7F:
-        buf.append((val & 0x7F) | 0x80)
-        val >>= 7
-    buf.append(val & 0x7F)
-    return buf
-
-def serialize_message(records):
-    buf = bytearray()
-    for field_num, wire_type, val in records:
-        key = (field_num << 3) | wire_type
-        buf.extend(serialize_varint(key))
-        if wire_type == 0:
-            buf.extend(serialize_varint(val))
-        elif wire_type == 2:
-            buf.extend(serialize_varint(len(val)))
-            buf.extend(val)
-    return bytes(buf)
-
-try:
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-
-    # 1. antigravityUnifiedStateSync.sidebarWorkspaces (Protobuf in Settings list)
-    cur.execute("SELECT value FROM ItemTable WHERE key='antigravityUnifiedStateSync.sidebarWorkspaces'")
-    row = cur.fetchone()
-    if row and row[0]:
-        raw = base64.b64decode(row[0])
-        records = parse_protobuf(raw)
-        new_records = []
-        removed_sb = 0
-        for f_num, w_type, val in records:
-            sub = parse_protobuf(val)
-            uri = None
-            for sf_num, sw_type, sval in sub:
-                if sf_num == 1 and sw_type == 2:
-                    uri = sval.decode('utf-8', errors='ignore')
-                    break
-            if uri and (uri.lower().rstrip('/') in uris_to_remove or uri.lower() in uris_to_remove):
-                removed_sb += 1
-                continue
-            new_records.append((f_num, w_type, val))
-        if removed_sb > 0:
-            new_raw = serialize_message(new_records)
-            new_b64 = base64.b64encode(new_raw).decode('ascii')
-            cur.execute("UPDATE ItemTable SET value=? WHERE key='antigravityUnifiedStateSync.sidebarWorkspaces'", (new_b64,))
-            print(f"Purged {removed_sb} workspace(s) from Antigravity sidebarWorkspaces (Settings list).")
-
-    # 2. history.recentlyOpenedPathsList (JSON in Open Recent)
-    cur.execute("SELECT value FROM ItemTable WHERE key='history.recentlyOpenedPathsList'")
-    row = cur.fetchone()
-    if row and row[0]:
-        data = json.loads(row[0])
-        orig_entries = data.get('entries', [])
-        new_entries = []
-        for e in orig_entries:
-            uri = e.get('folderUri') or (e.get('workspace', {}).get('configPath')) or e.get('fileUri')
-            if uri and (uri.lower().rstrip('/') in uris_to_remove or uri.lower() in uris_to_remove):
-                continue
-            new_entries.append(e)
-        if len(new_entries) != len(orig_entries):
-            data['entries'] = new_entries
-            cur.execute("UPDATE ItemTable SET value=? WHERE key='history.recentlyOpenedPathsList'", (json.dumps(data),))
-            print(f"Purged {len(orig_entries) - len(new_entries)} entry(ies) from recent opened list.")
-
-    # 3. content.trust.model.key (JSON trust info)
-    cur.execute("SELECT value FROM ItemTable WHERE key='content.trust.model.key'")
-    row = cur.fetchone()
-    if row and row[0]:
-        try:
-            data = json.loads(row[0])
-            orig = data.get('uriTrustInfo', [])
-            new_t = [t for t in orig if (t.get('uri', {}).get('external', '').lower().rstrip('/') not in uris_to_remove)]
-            if len(new_t) != len(orig):
-                data['uriTrustInfo'] = new_t
-                cur.execute("UPDATE ItemTable SET value=? WHERE key='content.trust.model.key'", (json.dumps(data),))
-                print(f"Purged {len(orig) - len(new_t)} entry(ies) from workspace trust store.")
-        except Exception: pass
-
-    # 4. antigravityUnifiedStateSync.trajectorySummaries (Protobuf trajectory history)
-    cur.execute("SELECT value FROM ItemTable WHERE key='antigravityUnifiedStateSync.trajectorySummaries'")
-    row = cur.fetchone()
-    if row and row[0]:
-        raw = base64.b64decode(row[0])
-        records = parse_protobuf(raw)
-        new_records = []
-        removed_traj = 0
-        for f_num, w_type, val in records:
-            sub = parse_protobuf(val)
-            drop = False
-            for sf_num, sw_type, sval in sub:
-                if sf_num == 1 and sw_type == 2:
-                    cid = sval.decode('utf-8', errors='ignore').lower()
-                    if cid in conv_ids_to_remove:
-                        drop = True
-                        break
-                elif sf_num == 2 and sw_type == 2:
-                    sub_text = sval.decode('latin1', errors='ignore').lower()
-                    for u in uris_to_remove:
-                        if u in sub_text:
-                            drop = True
-                            break
-            if drop:
-                removed_traj += 1
-                continue
-            new_records.append((f_num, w_type, val))
-        if removed_traj > 0:
-            new_raw = serialize_message(new_records)
-            new_b64 = base64.b64encode(new_raw).decode('ascii')
-            cur.execute("UPDATE ItemTable SET value=? WHERE key='antigravityUnifiedStateSync.trajectorySummaries'", (new_b64,))
-            print(f"Purged {removed_traj} trajectory summarie(s) from Antigravity session history.")
-
-    # 5. antigravity.notification.agent-finished-* (Old agent notifications)
-    removed_notifs = 0
-    for cid in conv_ids_to_remove:
-        cur.execute("DELETE FROM ItemTable WHERE key LIKE ?", (f"antigravity.notification.agent-finished-{cid}%",))
-        if cur.rowcount and cur.rowcount > 0:
-            removed_notifs += cur.rowcount
-    if removed_notifs > 0:
-        print(f"Purged {removed_notifs} agent notification(s) from state database.")
-
-    conn.commit()
-    conn.close()
-except Exception as ex:
-    print(f"Warning updating state.vscdb: {ex}", file=sys.stderr)
-"@
-
-        $payload = @{
-            uris     = @($urisToRemoveSet)
-            conv_ids = @($purgedBrainConvIds)
-        }
-        $payloadB64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json -Compress)))
-
-        foreach ($prof in $targetProfiles) {
-            if (Test-Path -Path $prof.GlobalVscdbFile) {
-                try {
-                    $vscdbBackup = "$($prof.GlobalVscdbFile).bak_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-                    Copy-Item -Path $prof.GlobalVscdbFile -Destination $vscdbBackup -Force
-
-                    Write-Host "`n[$($prof.Name)] Purging state.vscdb references..." -ForegroundColor Cyan
-                    $pyOutput = $pyScript | & $pythonCmd.Source - $prof.GlobalVscdbFile $payloadB64 2>&1
-                    if ($pyOutput) {
-                        Write-Host $pyOutput -ForegroundColor Green
+                        Write-Host "`n[$($prof.Name)] Purging state.vscdb references..." -ForegroundColor Cyan
+                        $pyOutput = & $pythonCmd.Source $vscdbTool "purge-workspaces" $prof.GlobalVscdbFile $payloadB64 2>&1
+                        if ($pyOutput) {
+                            Write-Host $pyOutput -ForegroundColor Green
+                        }
+                    } catch {
+                        Write-Warning "[$($prof.Name)] Non-fatal error updating state.vscdb: $_"
                     }
-                } catch {
-                    Write-Warning "[$($prof.Name)] Non-fatal error updating state.vscdb: $_"
                 }
             }
         }
