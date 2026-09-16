@@ -9,6 +9,7 @@
 
 ### Rule B: Planning & Confirmation
 - **Complex / Architectural:** Analyze first -> create `implementation_plan.md` (`RequestFeedback: true` for Proceed button) -> wait for explicit approval (re-plan on feedback). Never treat discussion affirmations as execution approval; require explicit trigger before editing code.
+- **Proceed Gate Execution:** Clicking "Proceed" on `implementation_plan.md` (or explicit approval) MUST strictly execute as `/implement` workflow: adopt plan as active spec, run Auto-Verify Dev Loop (Steps 2–4: 4-pass coding, honest test gates, live seams, Phase II review), and deliver via unstaged working tree.
 - **Trivial / Single-File / Typos:** Execute directly without planning overhead.
 - **Batch Queue Decoupled Turn Guard:** In multi-phase batch workflows (/implement, /investigate), NEVER chain consecutive phases/specs in one turn; emit checkpoint banner, schedule transition timer, and end turn.
 
