@@ -1,6 +1,6 @@
 """
 Antigravity VSCDB State Management Tool
-Provides CLI subcommands to inspect, synchronize, and purge workspace & session records
+Provides CLI subcommands to inspect and purge workspace & session records
 stored in Antigravity IDE's SQLite state database (state.vscdb).
 """
 
@@ -10,12 +10,97 @@ import json
 import base64
 import sqlite3
 
-# Ensure current lib directory is in sys.path for local module imports
-_lib_dir = os.path.dirname(os.path.abspath(__file__))
-if _lib_dir not in sys.path:
-    sys.path.insert(0, _lib_dir)
+# --- Internal Protobuf Parser & Serializer ---
 
-from antigravity_protobuf import parse_protobuf, serialize_message
+def parse_protobuf(data):
+    """
+    Parse raw protobuf byte stream into a list of (field_num, wire_type, val) tuples.
+    Supports wire_type 0 (varint) and wire_type 2 (length-delimited).
+    Guards against truncated data without raising IndexError.
+    """
+    i = 0
+    records = []
+    data_len = len(data) if data else 0
+    while i < data_len:
+        key = 0
+        shift = 0
+        while True:
+            if i >= data_len:
+                return records
+            b = data[i]
+            i += 1
+            key |= (b & 0x7F) << shift
+            shift += 7
+            if not (b & 0x80):
+                break
+        field_num = key >> 3
+        wire_type = key & 0x7
+        if wire_type == 0:
+            val = 0
+            shift = 0
+            while True:
+                if i >= data_len:
+                    return records
+                b = data[i]
+                i += 1
+                val |= (b & 0x7F) << shift
+                shift += 7
+                if not (b & 0x80):
+                    break
+            records.append((field_num, wire_type, val))
+        elif wire_type == 2:
+            length = 0
+            shift = 0
+            while True:
+                if i >= data_len:
+                    return records
+                b = data[i]
+                i += 1
+                length |= (b & 0x7F) << shift
+                shift += 7
+                if not (b & 0x80):
+                    break
+            if i + length > data_len:
+                val = data[i:]
+                i = data_len
+            else:
+                val = data[i:i + length]
+                i += length
+            records.append((field_num, wire_type, val))
+        else:
+            break
+    return records
+
+
+def serialize_varint(val):
+    """
+    Serialize an unsigned integer into protobuf varint bytes.
+    Raises ValueError if val is negative.
+    """
+    if val < 0:
+        raise ValueError(f"varint cannot be negative, got {val}")
+    buf = bytearray()
+    while val > 0x7F:
+        buf.append((val & 0x7F) | 0x80)
+        val >>= 7
+    buf.append(val & 0x7F)
+    return buf
+
+
+def serialize_message(records):
+    """
+    Serialize a list of (field_num, wire_type, val) tuples into protobuf bytes.
+    """
+    buf = bytearray()
+    for field_num, wire_type, val in records:
+        key = (field_num << 3) | wire_type
+        buf.extend(serialize_varint(key))
+        if wire_type == 0:
+            buf.extend(serialize_varint(val))
+        elif wire_type == 2:
+            buf.extend(serialize_varint(len(val)))
+            buf.extend(val)
+    return bytes(buf)
 
 
 def extract_workspaces(db_path: str) -> None:
@@ -46,187 +131,6 @@ def extract_workspaces(db_path: str) -> None:
     except Exception:
         print("[]")
 
-
-def sync_session(primary_db: str, secondary_db: str) -> None:
-    """
-    Synchronize workspace list, chat trajectories, recent files, and trust settings
-    from primary state.vscdb to secondary state.vscdb without copying sensitive auth tokens.
-    """
-    if not os.path.isfile(primary_db):
-        print(f"Warning: Primary database not found at '{primary_db}'.", file=sys.stderr)
-        return
-
-    # 1. Initial creation if secondary DB does not exist
-    if not os.path.isfile(secondary_db):
-        os.makedirs(os.path.dirname(secondary_db), exist_ok=True)
-        p_conn = sqlite3.connect(f"file:{primary_db}?immutable=1", uri=True)
-        s_conn = sqlite3.connect(secondary_db)
-        p_conn.backup(s_conn)
-        p_conn.close()
-
-        s_cur = s_conn.cursor()
-        s_cur.execute(
-            "DELETE FROM ItemTable WHERE key IN ("
-            "'antigravityUnifiedStateSync.oauthToken', "
-            "'antigravity.profileUrl', "
-            "'antigravityUnifiedStateSync.userStatus', "
-            "'antigravity.userStatus', "
-            "'google.antigravity'"
-            ") OR key LIKE 'google.antigravity%'"
-        )
-        s_conn.commit()
-        s_conn.close()
-        print("Secondary session profile initialized from primary.")
-        return
-
-    # 2. Incremental merge into existing secondary DB
-    p_conn = sqlite3.connect(f"file:{primary_db}?immutable=1", uri=True)
-    s_conn = sqlite3.connect(secondary_db)
-    p_cur = p_conn.cursor()
-    s_cur = s_conn.cursor()
-
-    keys = (
-        'antigravityUnifiedStateSync.sidebarWorkspaces',
-        'antigravityUnifiedStateSync.trajectorySummaries',
-        'history.recentlyOpenedPathsList',
-        'content.trust.model.key',
-    )
-    placeholders = ','.join('?' for _ in keys)
-
-    p_cur.execute(f"SELECT key, value FROM ItemTable WHERE key IN ({placeholders})", keys)
-    p_data = dict(p_cur.fetchall())
-    p_conn.close()
-
-    s_cur.execute(f"SELECT key, value FROM ItemTable WHERE key IN ({placeholders})", keys)
-    s_data = dict(s_cur.fetchall())
-
-    # A. Merge sidebarWorkspaces (Protobuf)
-    if 'antigravityUnifiedStateSync.sidebarWorkspaces' in p_data:
-        p_raw = base64.b64decode(p_data['antigravityUnifiedStateSync.sidebarWorkspaces'])
-        p_recs = parse_protobuf(p_raw)
-        s_recs = []
-        existing_uris = set()
-        if 'antigravityUnifiedStateSync.sidebarWorkspaces' in s_data and s_data['antigravityUnifiedStateSync.sidebarWorkspaces']:
-            s_raw = base64.b64decode(s_data['antigravityUnifiedStateSync.sidebarWorkspaces'])
-            s_recs = parse_protobuf(s_raw)
-            for f_num, w_type, val in s_recs:
-                sub = parse_protobuf(val)
-                for sf, sw, sv in sub:
-                    if sf == 1 and sw == 2:
-                        existing_uris.add(sv.decode('utf-8', errors='ignore'))
-                        break
-
-        added_sb = 0
-        for f_num, w_type, val in p_recs:
-            sub = parse_protobuf(val)
-            uri = None
-            for sf, sw, sv in sub:
-                if sf == 1 and sw == 2:
-                    uri = sv.decode('utf-8', errors='ignore')
-                    break
-            if uri and uri not in existing_uris:
-                s_recs.append((f_num, w_type, val))
-                existing_uris.add(uri)
-                added_sb += 1
-
-        if added_sb > 0 or not s_data.get('antigravityUnifiedStateSync.sidebarWorkspaces'):
-            new_b64 = base64.b64encode(serialize_message(s_recs)).decode('ascii')
-            s_cur.execute(
-                "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('antigravityUnifiedStateSync.sidebarWorkspaces', ?)",
-                (new_b64,),
-            )
-            if added_sb > 0:
-                print(f"Synced {added_sb} new workspace(s) to secondary sidebar.")
-
-    # B. Merge trajectorySummaries (Protobuf)
-    if 'antigravityUnifiedStateSync.trajectorySummaries' in p_data:
-        p_raw = base64.b64decode(p_data['antigravityUnifiedStateSync.trajectorySummaries'])
-        p_recs = parse_protobuf(p_raw)
-        s_recs = []
-        existing_cids = set()
-        if 'antigravityUnifiedStateSync.trajectorySummaries' in s_data and s_data['antigravityUnifiedStateSync.trajectorySummaries']:
-            s_raw = base64.b64decode(s_data['antigravityUnifiedStateSync.trajectorySummaries'])
-            s_recs = parse_protobuf(s_raw)
-            for f_num, w_type, val in s_recs:
-                sub = parse_protobuf(val)
-                for sf, sw, sv in sub:
-                    if sf == 1 and sw == 2:
-                        existing_cids.add(sv.decode('utf-8', errors='ignore').lower())
-                        break
-
-        added_traj = 0
-        for f_num, w_type, val in p_recs:
-            sub = parse_protobuf(val)
-            cid = None
-            for sf, sw, sv in sub:
-                if sf == 1 and sw == 2:
-                    cid = sv.decode('utf-8', errors='ignore').lower()
-                    break
-            if cid and cid not in existing_cids:
-                s_recs.append((f_num, w_type, val))
-                existing_cids.add(cid)
-                added_traj += 1
-
-        if added_traj > 0 or not s_data.get('antigravityUnifiedStateSync.trajectorySummaries'):
-            new_b64 = base64.b64encode(serialize_message(s_recs)).decode('ascii')
-            s_cur.execute(
-                "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('antigravityUnifiedStateSync.trajectorySummaries', ?)",
-                (new_b64,),
-            )
-            if added_traj > 0:
-                print(f"Synced {added_traj} conversation trajectory(ies) to secondary session.")
-
-    # C. Merge recentlyOpenedPathsList (JSON)
-    if 'history.recentlyOpenedPathsList' in p_data:
-        try:
-            p_json = json.loads(p_data['history.recentlyOpenedPathsList'])
-            s_json = json.loads(s_data.get('history.recentlyOpenedPathsList', '{"entries":[]}'))
-            s_entries = s_json.get('entries', [])
-            s_uris = set()
-            for e in s_entries:
-                u = e.get('folderUri') or (e.get('workspace', {}).get('configPath')) or e.get('fileUri')
-                if u:
-                    s_uris.add(u.lower().rstrip('/'))
-
-            added_recent = 0
-            for e in p_json.get('entries', []):
-                u = e.get('folderUri') or (e.get('workspace', {}).get('configPath')) or e.get('fileUri')
-                if u and u.lower().rstrip('/') not in s_uris:
-                    s_entries.append(e)
-                    s_uris.add(u.lower().rstrip('/'))
-                    added_recent += 1
-            if added_recent > 0:
-                s_json['entries'] = s_entries
-                s_cur.execute(
-                    "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', ?)",
-                    (json.dumps(s_json),),
-                )
-        except Exception:
-            pass
-
-    # D. Merge content.trust.model.key (JSON)
-    if 'content.trust.model.key' in p_data:
-        try:
-            p_trust = json.loads(p_data['content.trust.model.key'])
-            s_trust = json.loads(s_data.get('content.trust.model.key', '{"uriTrustInfo":[]}'))
-            s_uris = set([t.get('uri', {}).get('external', '').lower().rstrip('/') for t in s_trust.get('uriTrustInfo', [])])
-            added_t = 0
-            for t in p_trust.get('uriTrustInfo', []):
-                ext = t.get('uri', {}).get('external', '').lower().rstrip('/')
-                if ext and ext not in s_uris:
-                    s_trust.setdefault('uriTrustInfo', []).append(t)
-                    s_uris.add(ext)
-                    added_t += 1
-            if added_t > 0:
-                s_cur.execute(
-                    "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('content.trust.model.key', ?)",
-                    (json.dumps(s_trust),),
-                )
-        except Exception:
-            pass
-
-    s_conn.commit()
-    s_conn.close()
 
 
 def purge_workspaces(db_path: str, payload_b64: str) -> None:
@@ -385,7 +289,6 @@ def main():
         print("Usage: vscdb_tool.py <command> [<args>...]")
         print("Commands:")
         print("  extract-workspaces <db_path>")
-        print("  sync-session <primary_db> <secondary_db>")
         print("  purge-workspaces <db_path> <payload_b64>")
         sys.exit(1)
 
@@ -396,11 +299,6 @@ def main():
             print("[]")
             sys.exit(1)
         extract_workspaces(sys.argv[2])
-    elif command == "sync-session":
-        if len(sys.argv) < 4:
-            print("Error: sync-session requires <primary_db> and <secondary_db>", file=sys.stderr)
-            sys.exit(1)
-        sync_session(sys.argv[2], sys.argv[3])
     elif command == "purge-workspaces":
         if len(sys.argv) < 4:
             print("Error: purge-workspaces requires <db_path> and <payload_b64>", file=sys.stderr)

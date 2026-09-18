@@ -7,7 +7,7 @@ param (
 # ==============================================================================
 # Antigravity IDE - Secondary Session Launcher
 # Launches an isolated profile for secondary Google account / session authentication
-# while dynamically synchronizing workspaces, chat history, settings & extensions.
+# with isolated workspace & chat history, while sharing customizations, settings & extensions.
 # ==============================================================================
 
 # 1. Discover Antigravity IDE Executable
@@ -49,20 +49,13 @@ if (-not (Test-Path -LiteralPath $primaryRoot)) {
     $secondaryRoot = "$env:APPDATA\Antigravity IDE - Secondary"
 }
 
-$primaryUser            = Join-Path $primaryRoot "User"
-$secondaryUser          = Join-Path $secondaryRoot "User"
-$primaryGlobalStorage   = Join-Path $primaryUser "globalStorage"
-$secondaryGlobalStorage = Join-Path $secondaryUser "globalStorage"
-$primaryVscdb           = Join-Path $primaryGlobalStorage "state.vscdb"
-$secondaryVscdb         = Join-Path $secondaryGlobalStorage "state.vscdb"
-$extensionsDir          = "$env:USERPROFILE\.antigravity-ide\extensions"
+$primaryUser   = Join-Path $primaryRoot "User"
+$secondaryUser = Join-Path $secondaryRoot "User"
+$extensionsDir = "$env:USERPROFILE\.antigravity-ide\extensions"
 
-# Ensure target directories exist
+# Ensure target user profile directory exists
 if (-not (Test-Path -LiteralPath $secondaryUser)) {
     New-Item -ItemType Directory -Path $secondaryUser -Force | Out-Null
-}
-if (-not (Test-Path -LiteralPath $secondaryGlobalStorage)) {
-    New-Item -ItemType Directory -Path $secondaryGlobalStorage -Force | Out-Null
 }
 
 # 3. Synchronize Preferences & Keybindings (Hardlinks with copy fallback)
@@ -91,29 +84,14 @@ if ((Test-Path -LiteralPath $srcSnippets) -and (-not (Test-Path -LiteralPath $ds
     } catch {}
 }
 
-# 4. Synchronize VSCDB Workspace State & Trajectories (Protobuf & SQLite)
-$libDir = Join-Path $PSScriptRoot "lib"
-$pythonCmd = Get-Command python -ErrorAction SilentlyContinue | Select-Object -First 1
-
-if ($pythonCmd -and (Test-Path -LiteralPath $primaryVscdb)) {
-    try {
-        $vscdbTool = Join-Path $libDir "vscdb_tool.py"
-        if (Test-Path -LiteralPath $vscdbTool) {
-            $pyOutput = & $pythonCmd.Source $vscdbTool "sync-session" $primaryVscdb $secondaryVscdb 2>&1
-            if ($pyOutput) {
-                Write-Host $pyOutput -ForegroundColor Green
-            }
-        }
-    } catch {
-        Write-Warning "Could not synchronize state to secondary profile: $_"
-    }
-}
-
-# 5. Launch Secondary Session
-# Note: workspaceStorage is kept independent to prevent concurrent SQLite lock collisions.
-# Extensions are shared via --extensions-dir, while global agent customizations
-# (skills, rules, workflows in ~/.gemini/config/) and transcripts (~/.gemini/antigravity-ide/brain)
-# are automatically accessible under the active Windows user profile.
+# 4. Launch Secondary Session
+# Note:
+# - Workspace lists and chat trajectory history remain isolated between profiles to prevent
+#   context cross-contamination and SQLite lock collisions across active accounts.
+# - Agent customizations (skills, rules, workflows in ~/.gemini/config/ and project .agents/)
+#   are shared natively across all sessions under the active Windows user profile.
+# - Extensions are shared via --extensions-dir.
+# - User preferences, keybindings, and snippets are shared via User/ directory links.
 $launchArgs = @(
     "--user-data-dir", "`"$secondaryRoot`"",
     "--extensions-dir", "`"$extensionsDir`""
